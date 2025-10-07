@@ -373,7 +373,7 @@ public class Bootstrapper implements CommandLineRunner {
                                 " filha de um pescador, foi criada por um voador e nada mais deseja do que conquistar os céus de Windhaven. " +
                                 "A sua ambição é tão forte que a jovem desafia a tradição para se juntar à elite. Mas cedo irá descobrir que" +
                                 " nem todos os voadores estão dispostos a aceitá-la e terá de lutar e arriscar a vida pelo seu sonho. " +
-                                "Conseguirá Maris vencer ou tornar-se-á uma testemunha do fim de Windhaven coisas?",
+                                "Conseguirá Maris vencer ou tornar-se-á uma testemunha do fim de Windhaven?",
                         genre.get(),
                         authors,
                         null);
