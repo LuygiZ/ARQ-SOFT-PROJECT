@@ -1,13 +1,12 @@
-package pt.psoft.g1.psoftg1.authormanagement.model.SQL;
+package pt.psoft.g1.psoftg1.authormanagement.model.sql;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
-import pt.psoft.g1.psoftg1.shared.model.SQL.EntityWithPhotoEntity;
-import pt.psoft.g1.psoftg1.shared.model.SQL.NameEntity;
-import pt.psoft.g1.psoftg1.shared.model.SQL.PhotoEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.NameEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.PhotoEntity;
 
 @Profile("sql")
 @Primary

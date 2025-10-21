@@ -1,4 +1,4 @@
-package pt.psoft.g1.psoftg1.shared.model.SQL;
+package pt.psoft.g1.psoftg1.shared.model.sql;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
