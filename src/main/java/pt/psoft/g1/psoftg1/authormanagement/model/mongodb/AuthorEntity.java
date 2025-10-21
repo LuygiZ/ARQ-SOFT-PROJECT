@@ -3,17 +3,24 @@ package pt.psoft.g1.psoftg1.authormanagement.model.mongodb;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.StaleObjectStateException;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import pt.psoft.g1.psoftg1.authormanagement.services.UpdateAuthorRequest;
 import pt.psoft.g1.psoftg1.exceptions.ConflictException;
 import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
 import pt.psoft.g1.psoftg1.shared.model.Name;
 
-@Entity
+@Profile("mongodb")
+@Document(collection = "authors")
 public class AuthorEntity extends EntityWithPhoto {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "AUTHOR_NUMBER")
+    private String authorId;
+
     @Getter
+    @Field("authorNumber")
     private Long authorNumber;
 
     @Version
