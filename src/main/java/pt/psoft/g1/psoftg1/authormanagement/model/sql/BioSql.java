@@ -1,18 +1,27 @@
-package pt.psoft.g1.psoftg1.authormanagement.model;
+package pt.psoft.g1.psoftg1.authormanagement.model.sql;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import pt.psoft.g1.psoftg1.shared.model.StringUtilsCustom;
 
-public class Bio {
+@Embeddable
+public class BioSql {
+    @Transient
+    private final int BIO_MAX_LENGTH = 4096;
 
-    private static final int BIO_MAX_LENGTH = 4096;
-
+    @Column(nullable = false, length = BIO_MAX_LENGTH)
+    @NotNull
+    @Size(min = 1, max = BIO_MAX_LENGTH)
     private String bio;
 
-    public Bio(String bio) {
+    public BioSql(String bio) {
         setBio(bio);
     }
 
-    protected Bio() {
+    protected BioSql() {
     }
 
     public void setBio(String bio) {

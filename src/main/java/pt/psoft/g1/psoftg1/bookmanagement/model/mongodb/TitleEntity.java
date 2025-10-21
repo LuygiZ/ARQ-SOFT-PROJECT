@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Embeddable
-public class TitleMongo {
+public class TitleEntity {
     @Transient
     private final int TITLE_MAX_LENGTH = 128;
     @NotBlank(message = "Title cannot be blank")
@@ -17,10 +17,10 @@ public class TitleMongo {
     @Getter
     String title;
 
-    protected TitleMongo() {
+    protected TitleEntity() {
     }
 
-    public TitleMongo(String title) {
+    public TitleEntity(String title) {
         setTitle(title);
     }
 
