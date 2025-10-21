@@ -1,20 +1,27 @@
 package pt.psoft.g1.psoftg1.bookmanagement.model.mongodb;
 
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
+import pt.psoft.g1.psoftg1.bookmanagement.model.Description;
 import pt.psoft.g1.psoftg1.shared.model.StringUtilsCustom;
 
-@Embeddable
+@Profile("mongodb")
+@Document(collection = "descriptions")
 public class DescriptionMongo {
-    @Transient
-    private final int DESC_MAX_LENGTH = 4096;
 
-    @Size(max = DESC_MAX_LENGTH)
-    @Column(length = DESC_MAX_LENGTH)
-    String description;
+    @Id
+    private String id;
+
+    private final int length = Description.DESC_MAX_LENGTH;
+
+    @Size(max = length)
+    @Field("description")
+    private String description;
 
     public DescriptionMongo(String description) {
         setDescription(description);
@@ -26,7 +33,7 @@ public class DescriptionMongo {
     public void setDescription(@Nullable String description) {
         if (description == null || description.isBlank()) {
             this.description = null;
-        } else if (description.length() > DESC_MAX_LENGTH) {
+        } else if (description.length() > length) {
             throw new IllegalArgumentException("Description has a maximum of 4096 characters");
         } else {
             this.description = StringUtilsCustom.sanitizeHtml(description);

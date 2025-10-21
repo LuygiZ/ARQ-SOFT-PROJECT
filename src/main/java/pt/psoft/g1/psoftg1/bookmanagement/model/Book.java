@@ -1,9 +1,5 @@
 package pt.psoft.g1.psoftg1.bookmanagement.model;
 
-
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
 import org.hibernate.StaleObjectStateException;
 import pt.psoft.g1.psoftg1.authormanagement.model.Author;
 import pt.psoft.g1.psoftg1.bookmanagement.services.UpdateBookRequest;
@@ -15,64 +11,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Entity
-@Table(name = "Book", uniqueConstraints = {
-        @UniqueConstraint(name = "uc_book_isbn", columnNames = {"ISBN"})
-})
 public class Book extends EntityWithPhoto {
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    long pk;
 
-    @Version
-    @Getter
+    private long pk;
     private Long version;
-
-    @Embedded
-    Isbn isbn;
-
-    @Getter
-    @Embedded
-    @NotNull
-    Title title;
-
-    @Getter
-    @ManyToOne
-    @NotNull
-    Genre genre;
-
-    @Getter
-    @ManyToMany
+    private Isbn isbn;
+    private Title title;
+    private Genre genre;
     private List<Author> authors = new ArrayList<>();
-
-    @Embedded
-    Description description;
-
-    private void setTitle(String title) {this.title = new Title(title);}
-
-    private void setIsbn(String isbn) {
-        this.isbn = new Isbn(isbn);
-    }
-
-    private void setDescription(String description) {this.description = new Description(description); }
-
-    private void setGenre(Genre genre) {this.genre = genre; }
-
-    private void setAuthors(List<Author> authors) {this.authors = authors; }
-
-    public String getDescription(){ return this.description.toString(); }
+    private Description description;
 
     public Book(String isbn, String title, String description, Genre genre, List<Author> authors, String photoURI) {
         setTitle(title);
         setIsbn(isbn);
-        if(description != null)
+        if (description != null)
             setDescription(description);
-        if(genre==null)
+        if (genre == null)
             throw new IllegalArgumentException("Genre cannot be null");
         setGenre(genre);
-        if(authors == null)
+        if (authors == null)
             throw new IllegalArgumentException("Author list is null");
-        if(authors.isEmpty())
+        if (authors.isEmpty())
             throw new IllegalArgumentException("Author list is empty");
 
         setAuthors(authors);
@@ -83,14 +42,60 @@ public class Book extends EntityWithPhoto {
         // got ORM only
     }
 
+    private void setTitle(String title) {
+        this.title = new Title(title);
+    }
+
+    private void setIsbn(String isbn) {
+        this.isbn = new Isbn(isbn);
+    }
+
+    private void setDescription(String description) {
+        this.description = new Description(description);
+    }
+
+    private void setGenre(Genre genre) {
+        this.genre = genre;
+    }
+
+    private void setAuthors(List<Author> authors) {
+        this.authors = authors;
+    }
+
+    public String getDescription() {
+        return this.description.toString();
+    }
+
+    public String getIsbn() {
+        return this.isbn.toString();
+    }
+
+    public String getTitle() {
+        return this.title.toString();
+    }
+
+    public String getGenre() {
+        return this.genre.toString();
+    }
+
+    public List<Author> getAuthors() {
+        return this.authors;
+    }
+
+    public Long getVersion() {
+        return this.version;
+    }
+
+    // regras de negócio
     public void removePhoto(long desiredVersion) {
-        if(desiredVersion != this.version) {
+        if (desiredVersion != this.version) {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
 
         setPhotoInternal(null);
     }
 
+    // regras de negócio
     public void applyPatch(final Long desiredVersion, UpdateBookRequest request) {
         if (!Objects.equals(this.version, desiredVersion))
             throw new StaleObjectStateException("Object was already modified by another user", this.pk);
@@ -100,28 +105,25 @@ public class Book extends EntityWithPhoto {
         Genre genre = request.getGenreObj();
         List<Author> authors = request.getAuthorObjList();
         String photoURI = request.getPhotoURI();
-        if(title != null) {
+        if (title != null) {
             setTitle(title);
         }
 
-        if(description != null) {
+        if (description != null) {
             setDescription(description);
         }
 
-        if(genre != null) {
+        if (genre != null) {
             setGenre(genre);
         }
 
-        if(authors != null) {
+        if (authors != null) {
             setAuthors(authors);
         }
 
-        if(photoURI != null)
+        if (photoURI != null)
             setPhotoInternal(photoURI);
 
     }
 
-    public String getIsbn(){
-        return this.isbn.toString();
-    }
 }
