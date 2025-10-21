@@ -27,21 +27,34 @@ public class AuthorEntity extends EntityWithPhotoEntity {
     @Embedded
     private BioEntity bio;
 
-    protected AuthorEntity() {}
+    protected AuthorEntity() {
+    }
 
-    public AuthorEntity(NameEntity name, BioEntity bio, PhotoEntity photoURI)
-    {
+    public AuthorEntity(NameEntity name, BioEntity bio, PhotoEntity photoURI) {
         setName(name);
         setBio(bio);
         setPhoto(photoURI);
     }
 
     // Getters
-    public Long getVersion() { return version; }
-    public NameEntity getName() { return name; }
-    public BioEntity getBio() { return bio; }
+    public Long getVersion() {
+        return version;
+    }
+
+    public NameEntity getName() {
+        return name;
+    }
+
+    public BioEntity getBio() {
+        return bio;
+    }
 
     // Setters
-    private void setName(NameEntity name) { this.name = name; }
-    private void setBio(BioEntity bio) { this.bio = bio; }
+    private void setName(NameEntity name) {
+        this.name = name;
+    }
+
+    private void setBio(BioEntity bio) {
+        this.bio = bio;
+    }
 }
