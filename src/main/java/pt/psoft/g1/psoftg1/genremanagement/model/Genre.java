@@ -8,7 +8,7 @@ import lombok.Getter;
 @Table
 public class Genre {
     @Transient
-    private final int GENRE_MAX_LENGTH = 100;
+    public static final int GENRE_MAX_LENGTH = 100;
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     long pk;
