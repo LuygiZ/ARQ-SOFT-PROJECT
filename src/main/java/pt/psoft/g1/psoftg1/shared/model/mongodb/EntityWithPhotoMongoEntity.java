@@ -12,11 +12,11 @@ import java.nio.file.Path;
 
 @Getter
 @MappedSuperclass
-public abstract class EntityWithPhotoEntity {
+public abstract class EntityWithPhotoMongoEntity {
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "photo_id")
-    protected PhotoEntity photo;
+    protected PhotoMongoEntity photo;
 
     // This method is used by the mapper in order to set the photo. This will call
     // the setPhotoInternal method that
@@ -31,7 +31,7 @@ public abstract class EntityWithPhotoEntity {
         } else {
             try {
                 // If the Path object instantiation succeeds, it means that we have a valid Path
-                this.photo = new PhotoEntity(Path.of(photoURI));
+                this.photo = new PhotoMongoEntity(Path.of(photoURI));
             } catch (InvalidPathException e) {
                 // For some reason it failed, let's set to null to avoid invalid references to
                 // photos

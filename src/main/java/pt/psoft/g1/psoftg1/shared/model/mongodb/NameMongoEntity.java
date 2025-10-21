@@ -5,18 +5,20 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import pt.psoft.g1.psoftg1.shared.model.StringUtilsCustom;
+
 import org.springframework.context.annotation.PropertySource;
 
 @Getter
 @Embeddable
 @PropertySource({ "classpath:config/library.properties" })
-public class NameEntity {
+public class NameMongoEntity {
     @NotNull
     @NotBlank
     @Column(name = "NAME", length = 150)
     String name;
 
-    public NameEntity(String name) {
+    public NameMongoEntity(String name) {
         setName(name);
     }
 
@@ -42,7 +44,7 @@ public class NameEntity {
         return this.name;
     }
 
-    protected NameEntity() {
+    protected NameMongoEntity() {
         // for ORM only
     }
 }

@@ -11,7 +11,7 @@ import lombok.Setter;
 import java.nio.file.Path;
 
 @Entity
-public class PhotoEntity {
+public class PhotoMongoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long pk;
@@ -21,10 +21,10 @@ public class PhotoEntity {
     @Getter
     private String photoFile;
 
-    protected PhotoEntity() {
+    protected PhotoMongoEntity() {
     }
 
-    public PhotoEntity(Path photoPath) {
+    public PhotoMongoEntity(Path photoPath) {
         setPhotoFile(photoPath.toString());
     }
 }
