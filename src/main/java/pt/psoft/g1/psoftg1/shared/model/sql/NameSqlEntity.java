@@ -15,7 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 @Embeddable
 @PropertySource({"classpath:config/library.properties"})
 @Getter
-public class NameEntity {
+public class NameSqlEntity {
     @Column(name = "NAME", length = 150)
     @NotNull
     @NotBlank
@@ -23,12 +23,12 @@ public class NameEntity {
     @Setter
     private String name;
 
-    protected NameEntity()
+    protected NameSqlEntity()
     {
 
     }
 
-    public NameEntity(String name)
+    public NameSqlEntity(String name)
     {
         setName(name);
     }

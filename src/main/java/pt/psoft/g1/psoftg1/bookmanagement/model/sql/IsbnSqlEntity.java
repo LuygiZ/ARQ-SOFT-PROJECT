@@ -9,13 +9,13 @@ import java.io.Serializable;
 
 @Embeddable
 @EqualsAndHashCode
-public class IsbnEntity implements Serializable {
+public class IsbnSqlEntity implements Serializable {
     @Size(min = 10, max = 13)
     @Column(name = "ISBN", length = 16)
 
     String isbn;
 
-    public IsbnEntity(String isbn) {
+    public IsbnSqlEntity(String isbn) {
         if (isValidIsbn(isbn)) {
             this.isbn = isbn;
         } else {
@@ -23,7 +23,7 @@ public class IsbnEntity implements Serializable {
         }
     }
 
-    protected IsbnEntity() {
+    protected IsbnSqlEntity() {
     };
 
     private static boolean isValidIsbn(String isbn) {

@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import pt.psoft.g1.psoftg1.authormanagement.model.sql.AuthorEntity;
-import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreEntity;
+import pt.psoft.g1.psoftg1.authormanagement.model.sql.AuthorSqlEntity;
+import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreSqlEntity;
 import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.List;
 @Table(name = "Book", uniqueConstraints = {
         @UniqueConstraint(name = "uc_book_isbn", columnNames = { "ISBN" })
 })
-public class BookEntity extends EntityWithPhoto {
+public class BookSqlEntity extends EntityWithPhoto {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long pk;
@@ -28,26 +28,26 @@ public class BookEntity extends EntityWithPhoto {
     private Long version;
 
     @Embedded
-    private IsbnEntity isbn;
+    private IsbnSqlEntity isbn;
 
     @Getter
     @Embedded
     @NotNull
-    private TitleEntity title;
+    private TitleSqlEntity title;
 
     @Getter
     @ManyToOne
     @NotNull
-    private GenreEntity genre;
+    private GenreSqlEntity genre;
 
     @Getter
     @ManyToMany
-    private List<AuthorEntity> authors = new ArrayList<>();
+    private List<AuthorSqlEntity> authors = new ArrayList<>();
 
     @Embedded
-    private DescriptionEntity description;
+    private DescriptionSqlEntity description;
 
-    public BookEntity(IsbnEntity isbn, TitleEntity title, DescriptionEntity description, GenreEntity genre, List<AuthorEntity> authors, String photoURI)
+    public BookSqlEntity(IsbnSqlEntity isbn, TitleSqlEntity title, DescriptionSqlEntity description, GenreSqlEntity genre, List<AuthorSqlEntity> authors, String photoURI)
     {
         setTitle(title);
         setIsbn(isbn);
@@ -57,14 +57,14 @@ public class BookEntity extends EntityWithPhoto {
         setPhotoInternal(photoURI);
     }
 
-    protected BookEntity() {}
+    protected BookSqlEntity() {}
 
     // Setters
-    private void setTitle(TitleEntity title) { this.title = title; }
-    private void setIsbn(IsbnEntity isbn) { this.isbn = isbn; }
-    private void setDescription(DescriptionEntity description) { this.description = description; }
-    private void setGenre(GenreEntity genre) { this.genre = genre; }
-    private void setAuthors(List<AuthorEntity> authors) { this.authors = authors; }
+    private void setTitle(TitleSqlEntity title) { this.title = title; }
+    private void setIsbn(IsbnSqlEntity isbn) { this.isbn = isbn; }
+    private void setDescription(DescriptionSqlEntity description) { this.description = description; }
+    private void setGenre(GenreSqlEntity genre) { this.genre = genre; }
+    private void setAuthors(List<AuthorSqlEntity> authors) { this.authors = authors; }
 
     // Getters
     public String getDescription(){ return this.description.toString(); }

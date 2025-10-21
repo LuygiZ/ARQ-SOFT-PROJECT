@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("sql")
 @Primary
 @Entity
-public class PhotoEntity {
+public class PhotoSqlEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long pk;
@@ -23,9 +23,9 @@ public class PhotoEntity {
     @Setter
     private String photoFile;
 
-    protected PhotoEntity() { }
+    protected PhotoSqlEntity() { }
 
-    public PhotoEntity(String photoFile)
+    public PhotoSqlEntity(String photoFile)
     {
         setPhotoFile(photoFile);
     }

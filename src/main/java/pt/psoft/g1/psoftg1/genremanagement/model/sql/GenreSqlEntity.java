@@ -11,7 +11,7 @@ import pt.psoft.g1.psoftg1.genremanagement.model.Genre;
 @Primary
 @Entity
 @Table(name = "Genre")
-public class GenreEntity {
+public class GenreSqlEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -22,9 +22,9 @@ public class GenreEntity {
     @Getter
     private String genre;
 
-    protected GenreEntity() { }
+    protected GenreSqlEntity() { }
 
-    public GenreEntity(String genre) { setGenre(genre); }
+    public GenreSqlEntity(String genre) { setGenre(genre); }
 
     // Getter
     public Long getPk() {

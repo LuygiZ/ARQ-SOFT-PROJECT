@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreEntity;
-import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoEntity;
-import pt.psoft.g1.psoftg1.shared.model.sql.PhotoEntity;
-import pt.psoft.g1.psoftg1.usermanagement.model.sql.ReaderEntity;
+import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreSqlEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoSqlEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
+import pt.psoft.g1.psoftg1.usermanagement.model.sql.ReaderSqlEntity;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
 @Primary
 @Entity
 @Table(name = "READER_DETAILS")
-public class ReaderDetailsEntity extends EntityWithPhotoEntity {
+public class ReaderDetailsSqlEntity extends EntityWithPhotoSqlEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,22 +26,22 @@ public class ReaderDetailsEntity extends EntityWithPhotoEntity {
     @Setter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "reader_id", referencedColumnName = "USER_ID")
-    private ReaderEntity reader;
+    private ReaderSqlEntity reader;
 
     @Embedded
     @Getter
     @Setter
-    private ReaderNumberEntity readerNumber;
+    private ReaderNumberSqlEntity readerNumber;
 
     @Embedded
     @Getter
     @Setter
-    private BirthDateEntity birthDate;
+    private BirthDateSqlEntity birthDate;
 
     @Embedded
     @Getter
     @Setter
-    private PhoneNumberEntity phoneNumber;
+    private PhoneNumberSqlEntity phoneNumber;
 
     @Basic
     @Getter
@@ -66,13 +66,13 @@ public class ReaderDetailsEntity extends EntityWithPhotoEntity {
     @Getter
     @Setter
     @ManyToMany
-    private List<GenreEntity> interestList;
+    private List<GenreSqlEntity> interestList;
 
-    protected ReaderDetailsEntity() {}
+    protected ReaderDetailsSqlEntity() {}
 
-    public ReaderDetailsEntity(ReaderNumberEntity readerNumber, ReaderEntity reader, BirthDateEntity birthDate, PhoneNumberEntity phoneNumber,
-                               boolean gdprConsent, boolean marketingConsent, boolean thirdPartySharingConsent,
-                               PhotoEntity photo, List<GenreEntity> interestList)
+    public ReaderDetailsSqlEntity(ReaderNumberSqlEntity readerNumber, ReaderSqlEntity reader, BirthDateSqlEntity birthDate, PhoneNumberSqlEntity phoneNumber,
+                                  boolean gdprConsent, boolean marketingConsent, boolean thirdPartySharingConsent,
+                                  PhotoSqlEntity photo, List<GenreSqlEntity> interestList)
     {
         setReader(reader);
         setReaderNumber(readerNumber);

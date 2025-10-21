@@ -10,7 +10,7 @@ import pt.psoft.g1.psoftg1.bookmanagement.model.Description;
 
 @Profile("mongodb")
 @Document(collection = "descriptions")
-public class DescriptionEntity {
+public class DescriptionMongoEntity {
 
     @Id
     private String id;
@@ -21,7 +21,7 @@ public class DescriptionEntity {
     @Field("description")
     private String description;
 
-    public DescriptionEntity(Description description) {
+    public DescriptionMongoEntity(Description description) {
         if (description != null) {
             this.description = description.getDescription();
         } else {
@@ -29,7 +29,7 @@ public class DescriptionEntity {
         }
     }
 
-    protected DescriptionEntity() {
+    protected DescriptionMongoEntity() {
     }
 
     public void setDescription(String description) {

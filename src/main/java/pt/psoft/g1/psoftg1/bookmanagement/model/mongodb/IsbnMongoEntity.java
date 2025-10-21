@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 @EqualsAndHashCode
 @Document(collection = "isbns")
-public class IsbnEntity implements Serializable {
+public class IsbnMongoEntity implements Serializable {
 
     @Id
     private String isbnId;
@@ -20,11 +20,11 @@ public class IsbnEntity implements Serializable {
     @Field("isbn")
     private String isbn;
 
-    public IsbnEntity(String isbn) {
+    public IsbnMongoEntity(String isbn) {
         setIsbn(isbn);
     }
 
-    protected IsbnEntity() {
+    protected IsbnMongoEntity() {
     };
 
     public String toString() {

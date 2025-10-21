@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Profile("mongodb")
 @Document(collection = "genres")
-public class GenreEntity {
+public class GenreMongoEntity {
 
     private final int GENRE_MAX_LENGTH = 100;
     @Id
@@ -21,11 +21,11 @@ public class GenreEntity {
     @Field("genre")
     String genre;
 
-    public GenreEntity(String genre) {
+    public GenreMongoEntity(String genre) {
         setGenre(genre);
     }
 
-    protected GenreEntity() {
+    protected GenreMongoEntity() {
         // for ORM only
     }
 

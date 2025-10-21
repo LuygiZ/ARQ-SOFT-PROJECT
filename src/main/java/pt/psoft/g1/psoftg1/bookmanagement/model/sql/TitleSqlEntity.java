@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Embeddable
-public class TitleEntity {
+public class TitleSqlEntity {
     @Transient
     private final int TITLE_MAX_LENGTH = 128;
     @NotBlank(message = "Title cannot be blank")
@@ -17,10 +17,10 @@ public class TitleEntity {
     @Getter
     String title;
 
-    protected TitleEntity() {
+    protected TitleSqlEntity() {
     }
 
-    public TitleEntity(String title) {
+    public TitleSqlEntity(String title) {
         setTitle(title);
     }
 

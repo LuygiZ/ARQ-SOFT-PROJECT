@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Getter;
 
-import pt.psoft.g1.psoftg1.authormanagement.model.mongodb.AuthorEntity;
-import pt.psoft.g1.psoftg1.genremanagement.model.mongodb.GenreEntity;
+import pt.psoft.g1.psoftg1.authormanagement.model.mongodb.AuthorMongoEntity;
+import pt.psoft.g1.psoftg1.genremanagement.model.mongodb.GenreMongoEntity;
 import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import java.util.List;
 
 @Profile("mongodb")
 @Document(collection = "books")
-public class BookEntity extends EntityWithPhoto {
+public class BookMongoEntity extends EntityWithPhoto {
 
     @Id
     private String bookId;
@@ -32,33 +32,33 @@ public class BookEntity extends EntityWithPhoto {
 
     @Field("isbn")
     @Indexed(unique = true)
-    private IsbnEntity isbn;
+    private IsbnMongoEntity isbn;
 
     @Getter
     @Field("title")
     @NotNull
-    private TitleEntity title;
+    private TitleMongoEntity title;
 
     @Getter
     @DBRef // foreign key reference
     @NotNull
     @Field("genre")
-    private GenreEntity genre;
+    private GenreMongoEntity genre;
 
     @Getter
     @DBRef // foreign key reference
     @Field("authors")
-    private List<AuthorEntity> authors = new ArrayList<>();
+    private List<AuthorMongoEntity> authors = new ArrayList<>();
 
     @Field("description")
-    private DescriptionEntity description;
+    private DescriptionMongoEntity description;
 
-    public BookEntity(
-            IsbnEntity isbn,
-            TitleEntity title,
-            DescriptionEntity description,
-            GenreEntity genre,
-            List<AuthorEntity> authors,
+    public BookMongoEntity(
+            IsbnMongoEntity isbn,
+            TitleMongoEntity title,
+            DescriptionMongoEntity description,
+            GenreMongoEntity genre,
+            List<AuthorMongoEntity> authors,
             String photoURI) {
 
         setTitle(title);
@@ -69,27 +69,27 @@ public class BookEntity extends EntityWithPhoto {
         setPhotoInternal(photoURI);
     }
 
-    protected BookEntity() {
+    protected BookMongoEntity() {
         // got ORM only
     }
 
-    private void setTitle(TitleEntity title) {
+    private void setTitle(TitleMongoEntity title) {
         this.title = title;
     }
 
-    private void setIsbn(IsbnEntity isbn) {
+    private void setIsbn(IsbnMongoEntity isbn) {
         this.isbn = isbn;
     }
 
-    private void setDescription(DescriptionEntity description) {
+    private void setDescription(DescriptionMongoEntity description) {
         this.description = description;
     }
 
-    private void setGenre(GenreEntity genre) {
+    private void setGenre(GenreMongoEntity genre) {
         this.genre = genre;
     }
 
-    private void setAuthors(List<AuthorEntity> authors) {
+    private void setAuthors(List<AuthorMongoEntity> authors) {
         this.authors = authors;
     }
 

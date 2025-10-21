@@ -3,24 +3,17 @@ package pt.psoft.g1.psoftg1.authormanagement.model.mongodb;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.StaleObjectStateException;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-
 import pt.psoft.g1.psoftg1.authormanagement.services.UpdateAuthorRequest;
 import pt.psoft.g1.psoftg1.exceptions.ConflictException;
 import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
 import pt.psoft.g1.psoftg1.shared.model.Name;
 
-@Profile("mongodb")
-@Document(collection = "authors")
-public class AuthorEntity extends EntityWithPhoto {
+@Entity
+public class AuthorMongoEntity extends EntityWithPhoto {
     @Id
-    private String authorId;
-
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "AUTHOR_NUMBER")
     @Getter
-    @Field("authorNumber")
     private Long authorNumber;
 
     @Version
@@ -30,14 +23,14 @@ public class AuthorEntity extends EntityWithPhoto {
     private Name name;
 
     @Embedded
-    private BioEntity bio;
+    private BioMongoEntity bio;
 
     public void setName(String name) {
         this.name = new Name(name);
     }
 
     public void setBio(String bio) {
-        this.bio = new BioEntity(bio);
+        this.bio = new BioMongoEntity(bio);
     }
 
     public Long getVersion() {
@@ -48,13 +41,13 @@ public class AuthorEntity extends EntityWithPhoto {
         return authorNumber;
     }
 
-    public AuthorEntity(String name, String bio, String photoURI) {
+    public AuthorMongoEntity(String name, String bio, String photoURI) {
         setName(name);
         setBio(bio);
         setPhotoInternal(photoURI);
     }
 
-    protected AuthorEntity() {
+    protected AuthorMongoEntity() {
         // got ORM only
     }
 

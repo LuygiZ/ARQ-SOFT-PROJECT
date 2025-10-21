@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookEntity;
-import pt.psoft.g1.psoftg1.readermanagement.model.sql.ReaderDetailsEntity;
+import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
+import pt.psoft.g1.psoftg1.readermanagement.model.sql.ReaderDetailsSqlEntity;
 
 import java.time.LocalDate;
 
@@ -16,24 +16,24 @@ import java.time.LocalDate;
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames={"LENDING_NUMBER"})})
-public class LendingEntity {
+public class LendingSqlEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long pk;
 
     @Embedded
-    private LendingNumberEntity lendingNumber;
+    private LendingNumberSqlEntity lendingNumber;
 
     @NotNull
     @Getter
     @ManyToOne(fetch=FetchType.EAGER, optional = false)
-    private BookEntity book;
+    private BookSqlEntity book;
 
     @NotNull
     @Getter
     @ManyToOne(fetch=FetchType.EAGER, optional = false)
-    private ReaderDetailsEntity readerDetails;
+    private ReaderDetailsSqlEntity readerDetails;
 
     @NotNull
     @Column(nullable = false, updatable = false)
@@ -69,11 +69,11 @@ public class LendingEntity {
     @Transient
     private Integer daysOverdue;
 
-    protected LendingEntity() {}
+    protected LendingSqlEntity() {}
 
-    public LendingEntity(BookEntity book, ReaderDetailsEntity readerDetails, LendingNumberEntity lendingNumber,
-                         LocalDate startDate, LocalDate limitDate, LocalDate returnedDate, int fineValuePerDayInCents,
-                         String commentary) {
+    public LendingSqlEntity(BookSqlEntity book, ReaderDetailsSqlEntity readerDetails, LendingNumberSqlEntity lendingNumber,
+                            LocalDate startDate, LocalDate limitDate, LocalDate returnedDate, int fineValuePerDayInCents,
+                            String commentary) {
         this.book = book;
         this.readerDetails = readerDetails;
         this.lendingNumber = lendingNumber;

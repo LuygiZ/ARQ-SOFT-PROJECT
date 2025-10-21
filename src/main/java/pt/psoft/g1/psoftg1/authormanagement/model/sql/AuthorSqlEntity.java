@@ -4,14 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoEntity;
-import pt.psoft.g1.psoftg1.shared.model.sql.NameEntity;
-import pt.psoft.g1.psoftg1.shared.model.sql.PhotoEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoSqlEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
+import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 
 @Profile("sql")
 @Primary
 @Entity
-public class AuthorEntity extends EntityWithPhotoEntity {
+public class AuthorSqlEntity extends EntityWithPhotoSqlEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "AUTHOR_NUMBER")
@@ -22,15 +22,15 @@ public class AuthorEntity extends EntityWithPhotoEntity {
     private long version;
 
     @Embedded
-    private NameEntity name;
+    private NameSqlEntity name;
 
     @Embedded
-    private BioEntity bio;
+    private BioSqlEntity bio;
 
-    protected AuthorEntity() {
+    protected AuthorSqlEntity() {
     }
 
-    public AuthorEntity(NameEntity name, BioEntity bio, PhotoEntity photoURI) {
+    public AuthorSqlEntity(NameSqlEntity name, BioSqlEntity bio, PhotoSqlEntity photoURI) {
         setName(name);
         setBio(bio);
         setPhoto(photoURI);
@@ -41,20 +41,20 @@ public class AuthorEntity extends EntityWithPhotoEntity {
         return version;
     }
 
-    public NameEntity getName() {
+    public NameSqlEntity getName() {
         return name;
     }
 
-    public BioEntity getBio() {
+    public BioSqlEntity getBio() {
         return bio;
     }
 
     // Setters
-    private void setName(NameEntity name) {
+    private void setName(NameSqlEntity name) {
         this.name = name;
     }
 
-    private void setBio(BioEntity bio) {
+    private void setBio(BioSqlEntity bio) {
         this.bio = bio;
     }
 }

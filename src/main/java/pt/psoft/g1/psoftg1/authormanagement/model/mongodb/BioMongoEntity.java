@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-public class BioEntity {
+public class BioMongoEntity {
 
     @Id
     @Getter
@@ -23,11 +23,11 @@ public class BioEntity {
     @Getter
     private String bio;
 
-    public BioEntity(String bio) {
+    public BioMongoEntity(String bio) {
         setBio(bio);
     }
 
-    protected BioEntity() {
+    protected BioMongoEntity() {
         // for ORM only
     }
 

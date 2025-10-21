@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import pt.psoft.g1.psoftg1.shared.model.StringUtilsCustom;
 
 @Embeddable
-public class DescriptionEntity {
+public class DescriptionSqlEntity {
     @Transient
     private final int DESC_MAX_LENGTH = 4096;
 
@@ -16,11 +16,11 @@ public class DescriptionEntity {
     @Column(length = DESC_MAX_LENGTH)
     String description;
 
-    public DescriptionEntity(String description) {
+    public DescriptionSqlEntity(String description) {
         setDescription(description);
     }
 
-    protected DescriptionEntity() {
+    protected DescriptionSqlEntity() {
     }
 
     public void setDescription(@Nullable String description) {

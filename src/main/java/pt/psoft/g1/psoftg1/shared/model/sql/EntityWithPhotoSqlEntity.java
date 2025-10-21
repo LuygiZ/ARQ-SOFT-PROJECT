@@ -14,28 +14,28 @@ import org.springframework.context.annotation.Profile;
 @Primary
 @Getter
 @MappedSuperclass
-public abstract class EntityWithPhotoEntity
+public abstract class EntityWithPhotoSqlEntity
 {
     @Nullable
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="photo_id", nullable = true)
     @Setter
     @Getter
-    private PhotoEntity photo;
+    private PhotoSqlEntity photo;
 
-    protected EntityWithPhotoEntity() { }
+    protected EntityWithPhotoSqlEntity() { }
 
-    public EntityWithPhotoEntity(PhotoEntity photo)
+    public EntityWithPhotoSqlEntity(PhotoSqlEntity photo)
     {
         setPhotoInternal(photo);
     }
 
-    protected void setPhotoInternal(PhotoEntity photoURI)
+    protected void setPhotoInternal(PhotoSqlEntity photoURI)
     {
         this.photo = photoURI;
     }
     protected void setPhotoInternal(String photoURI)
     {
-        setPhotoInternal(new PhotoEntity(photoURI));
+        setPhotoInternal(new PhotoSqlEntity(photoURI));
     }
 }
