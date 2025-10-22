@@ -10,14 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 
-
-@Embeddable
-@NoArgsConstructor
-@PropertySource({"classpath:config/library.properties"})
 public class BirthDate {
-    @Getter
-    @Column(nullable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
     LocalDate birthDate;
 
     @Transient

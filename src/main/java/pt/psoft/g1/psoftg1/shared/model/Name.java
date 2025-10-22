@@ -7,40 +7,43 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.context.annotation.PropertySource;
 
-@Getter
-@Embeddable
-@PropertySource({"classpath:config/library.properties"})
-public class Name {
-    @NotNull
-    @NotBlank
-    @Column(name="NAME", length = 150)
-    String name;
-    public Name(String name){
+public class Name
+{
+    private String name;
+
+    public Name(String name)
+    {
         setName(name);
     }
 
-    public void setName(String name){
-        if(name == null)
-            throw new IllegalArgumentException("Name cannot be null");
-        if(name.isBlank())
-            throw new IllegalArgumentException("Name cannot be blank, nor only white spaces");
-        if(!StringUtilsCustom.isAlphanumeric(name))
-            throw new IllegalArgumentException("Name can only contain alphanumeric characters");
+    protected Name()
+    {
+        // smth here
+    }
 
-/*
-        //  Logic moved to UserService.java, ReaderService.java
-        for(String forbidden : forbiddenNames){
-            if(name.contains(forbidden))
-                throw new IllegalArgumentException("Name contains forbidden word");
+    // Setter
+    public void setName(String name)
+    {
+        if (name == null)
+        {
+            throw new IllegalArgumentException("Name cannot be null");
         }
-*/
+        if (name.isBlank())
+        {
+            throw new IllegalArgumentException("Name cannot be blank or only white spaces");
+        }
+        if (!StringUtilsCustom.isAlphanumeric(name))
+        {
+            throw new IllegalArgumentException("Name can only contain alphanumeric characters");
+        }
+
         this.name = name;
     }
-    public String toString() {
-        return this.name;
-    }
 
-    protected Name() {
-        // for ORM only
-    }
+    // Getter
+    public String getName() { return this.name; }
+
+    // Helper
+    public String toString() { return this.name; }
 }
+

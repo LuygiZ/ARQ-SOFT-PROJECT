@@ -1,8 +1,5 @@
 package pt.psoft.g1.psoftg1.usermanagement.model;
 
-import jakarta.persistence.Entity;
-
-@Entity
 public class Reader extends User {
     protected Reader() {
         // for ORM only
