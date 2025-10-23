@@ -186,7 +186,6 @@ public class Lending {
 
     protected Lending() {}
 
-    //TODO: Provavelmente tenho de remover isto
     /**Factory method meant to be only used in bootstrapping.*/
     public static Lending newBootstrappingLending(Book book,
                                                   ReaderDetails readerDetails,

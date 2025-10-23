@@ -21,12 +21,16 @@ public class Bio {
         if (bio.isBlank())
             throw new IllegalArgumentException("Bio cannot be blank");
         if (bio.length() > BIO_MAX_LENGTH)
-            throw new IllegalArgumentException("Bio has a maximum of 4096 characters");
+            throw new IllegalArgumentException("Bio has a maximum of " + BIO_MAX_LENGTH + " characters");
         this.bio = StringUtilsCustom.sanitizeHtml(bio);
     }
 
-    @Override
     public String toString() {
+        return bio;
+    }
+
+    public String getValue()
+    {
         return bio;
     }
 }
