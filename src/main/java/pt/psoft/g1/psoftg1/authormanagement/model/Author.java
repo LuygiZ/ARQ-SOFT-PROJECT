@@ -68,7 +68,7 @@ public class Author extends EntityWithPhoto {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
 
-        setPhotoInternal(null);
+        setPhotoInternal((String)null);
     }
     public String getName() {
         return this.name.toString();

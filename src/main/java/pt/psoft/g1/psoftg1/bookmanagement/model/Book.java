@@ -92,7 +92,7 @@ public class Book extends EntityWithPhoto {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
 
-        setPhotoInternal(null);
+        setPhotoInternal((String)null);
     }
 
     // regras de negócio

@@ -2,6 +2,7 @@ package pt.psoft.g1.psoftg1.usermanagement.model.mongodb;
 
 import jakarta.persistence.Entity;
 
+/*
 @Entity
 public class ReaderMongoEntity extends UserMongoEntity {
     protected ReaderMongoEntity() {
@@ -22,7 +23,7 @@ public class ReaderMongoEntity extends UserMongoEntity {
      * @param password
      * @param name
      * @return
-     */
+
 
     public static ReaderMongoEntity newReader(final String username, final String password, final String name) {
         final var u = new ReaderMongoEntity(username, password);
@@ -30,3 +31,4 @@ public class ReaderMongoEntity extends UserMongoEntity {
         return u;
     }
 }
+ */

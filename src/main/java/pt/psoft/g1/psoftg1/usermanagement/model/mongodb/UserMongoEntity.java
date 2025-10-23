@@ -20,6 +20,7 @@
  */
 package pt.psoft.g1.psoftg1.usermanagement.model.mongodb;
 
+/*
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,7 +46,7 @@ import lombok.Setter;
 /**
  * Based on https://github.com/Yoh0xFF/java-spring-security-example
  *
- */
+
 @Entity
 @Table(name = "T_USER")
 @EntityListeners(AuditingEntityListener.class)
@@ -92,7 +93,7 @@ public class UserMongoEntity implements UserDetails {
 	private boolean enabled = true;
 
 	@Setter
-	@Column(unique = true, /* updatable = false, */ nullable = false)
+	@Column(unique = true, /* updatable = false, nullable = false)
 	@Email
 	@Getter
 	@NotNull
@@ -122,7 +123,7 @@ public class UserMongoEntity implements UserDetails {
 	 *
 	 * @param username
 	 * @param password
-	 */
+
 	public UserMongoEntity(final String username, final String password) {
 		this.username = username;
 		setPassword(password);
@@ -137,7 +138,7 @@ public class UserMongoEntity implements UserDetails {
 	 * @param password
 	 * @param name
 	 * @return
-	 */
+
 	public static UserMongoEntity newUser(final String username, final String password, final String name) {
 		final var u = new UserMongoEntity(username, password);
 		u.setName(name);
@@ -154,7 +155,7 @@ public class UserMongoEntity implements UserDetails {
 	 * @param name
 	 * @param role
 	 * @return
-	 */
+
 	public static UserMongoEntity newUser(final String username, final String password, final String name,
 			final String role) {
 		final var u = new UserMongoEntity(username, password);
@@ -192,3 +193,4 @@ public class UserMongoEntity implements UserDetails {
 		this.name = new Name(name);
 	}
 }
+*/
