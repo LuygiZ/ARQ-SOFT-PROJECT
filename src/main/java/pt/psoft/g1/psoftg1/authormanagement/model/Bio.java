@@ -4,7 +4,7 @@ import pt.psoft.g1.psoftg1.shared.model.StringUtilsCustom;
 
 public class Bio {
 
-    private static final int BIO_MAX_LENGTH = 4096;
+    public static final int BIO_MAX_LENGTH = 4096;
 
     private String bio;
 
@@ -29,4 +29,12 @@ public class Bio {
     public String toString() {
         return bio;
     }
+
+    public String getValue()
+    {
+        return bio;
+    }
+
+
+
 }
