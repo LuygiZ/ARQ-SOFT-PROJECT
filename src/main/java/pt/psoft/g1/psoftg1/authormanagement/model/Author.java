@@ -1,6 +1,5 @@
 package pt.psoft.g1.psoftg1.authormanagement.model;
 
-import jakarta.persistence.*;
 import org.hibernate.StaleObjectStateException;
 import pt.psoft.g1.psoftg1.authormanagement.services.UpdateAuthorRequest;
 import pt.psoft.g1.psoftg1.exceptions.ConflictException;
@@ -11,49 +10,54 @@ import pt.psoft.g1.psoftg1.shared.model.Photo;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class Author extends EntityWithPhoto
-{
+public class Author extends EntityWithPhoto {
     private Long authorNumber;
     private long version;
     private Name name;
     private Bio bio;
 
-    public Author(Name name, Bio bio, Photo photo)
-    {
+    public Author(Name name, Bio bio, Photo photo) {
         setName(name);
         setBio(bio);
         setPhotoInternal(photo);
         this.version = 0L;
     }
 
-    public Author(String name, String bio, String photo)
-    {
+    public Author(String name, String bio, String photo) {
         this(new Name(name), new Bio(bio), new Photo(Paths.get(photo)));
     }
 
-    public Author() { }
+    public Author() {
+    }
 
     // Getters
-    public Long getAuthorNumber() { return authorNumber; }
-    public long getVersion() { return version; }
-    public Name getName() { return name; }
-    public Bio getBio() { return bio; }
+    public Long getAuthorNumber() {
+        return authorNumber;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public Name getName() {
+        return name;
+    }
+
+    public Bio getBio() {
+        return bio;
+    }
 
     // Setters
-    private void setName(Name name)
-    {
-        if (name == null)
-        {
+    private void setName(Name name) {
+        if (name == null) {
             throw new IllegalArgumentException("Name cannot be null");
         }
 
         this.name = name;
     }
 
-    private void setBio(Bio bio)
-    {
-        if (bio == null)
-        {
+    private void setBio(Bio bio) {
+        if (bio == null) {
             throw new IllegalArgumentException("Bio cannot be null");
         }
 
@@ -61,37 +65,29 @@ public class Author extends EntityWithPhoto
     }
 
     // Logica de negocio
-    public void applyPatch(final long expectedVersion, final UpdateAuthorRequest request)
-    {
-        if (!Objects.equals(this.version, expectedVersion))
-        {
+    public void applyPatch(final long expectedVersion, final UpdateAuthorRequest request) {
+        if (!Objects.equals(this.version, expectedVersion)) {
             throw new StaleObjectStateException("Object was already modified by another user", this.authorNumber);
         }
 
-        if (request.getName() != null)
-        {
+        if (request.getName() != null) {
             setName(new Name(request.getName()));
         }
 
-        if (request.getBio() != null)
-        {
+        if (request.getBio() != null) {
             setBio(new Bio(request.getBio()));
         }
 
-        if (request.getPhoto() != null)
-        {
+        if (request.getPhoto() != null) {
             setPhotoInternal(request.getPhotoURI());
         }
     }
 
-    public void removePhoto(Long expectedVersion)
-    {
-        if (!Objects.equals(expectedVersion, this.version))
-        {
+    public void removePhoto(Long expectedVersion) {
+        if (!Objects.equals(expectedVersion, this.version)) {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
 
         setPhotoInternal((String) null);
     }
 }
-

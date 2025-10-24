@@ -1,16 +1,16 @@
-package pt.psoft.g1.psoftg1.readermanagement.model;
+package pt.psoft.g1.psoftg1.readermanagement.model.mongodb;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 
-public class ReaderNumber implements Serializable {
+public class ReaderNumberMongoEntity implements Serializable {
     private final String readerNumber;
 
-    public ReaderNumber(int year, int number) {
+    public ReaderNumberMongoEntity(int year, int number) {
         this.readerNumber = year + "/" + number;
     }
 
-    public ReaderNumber(int number) {
+    public ReaderNumberMongoEntity(int number) {
         this.readerNumber = LocalDate.now().getYear() + "/" + number;
     }
 

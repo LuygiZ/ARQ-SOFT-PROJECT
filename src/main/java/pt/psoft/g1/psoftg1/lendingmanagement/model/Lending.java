@@ -1,11 +1,7 @@
 package pt.psoft.g1.psoftg1.lendingmanagement.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import lombok.Getter;
+
 import org.hibernate.StaleObjectStateException;
 import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
 import pt.psoft.g1.psoftg1.readermanagement.model.ReaderDetails;
@@ -17,16 +13,26 @@ import java.util.Optional;
 
 /**
  * The {@code Lending} class associates a {@code Reader} and a {@code Book}.
- * <p>It stores the date it was registered, the date it is supposed to
+ * <p>
+ * It stores the date it was registered, the date it is supposed to
  * be returned, and the date it actually was returned.
- * It also stores an optional reader {@code commentary} (submitted at the time of the return) and
+ * It also stores an optional reader {@code commentary} (submitted at the time
+ * of the return) and
  * the {@code Fine}, if applicable.
- * <p>It is identified in the system by an auto-generated {@code id}, and has a unique-constrained
+ * <p>
+ * It is identified in the system by an auto-generated {@code id}, and has a
+ * unique-constrained
  * natural key ({@code LendingNumber}) with its own business rules.
- * @author  rmfranca*/
-/*@Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames={"LENDING_NUMBER"})})*/
+ * 
+ * @author rmfranca
+ */
+/*
+ * @Entity
+ * 
+ * @Table(uniqueConstraints = {
+ * 
+ * @UniqueConstraint(columnNames={"LENDING_NUMBER"})})
+ */
 public class Lending {
 
     private Long pk;
@@ -42,15 +48,11 @@ public class Lending {
     private Integer daysOverdue;
     private int fineValuePerDayInCents;
 
-    public Lending(Book book, ReaderDetails readerDetails, int seq, int lendingDuration, int fineValuePerDayInCents)
-    {
-        try
-        {
+    public Lending(Book book, ReaderDetails readerDetails, int seq, int lendingDuration, int fineValuePerDayInCents) {
+        try {
             this.book = Objects.requireNonNull(book);
             this.readerDetails = Objects.requireNonNull(readerDetails);
-        }
-        catch (NullPointerException e)
-        {
+        } catch (NullPointerException e) {
             throw new IllegalArgumentException("Null objects passed to lending");
         }
 
@@ -65,9 +67,9 @@ public class Lending {
     }
 
     @Builder
-    public Lending(Book book, ReaderDetails readerDetails, LendingNumber lendingNumber, LocalDate startDate, LocalDate limitDate, LocalDate returnedDate, int fineValuePerDayInCents) {
-        try
-        {
+    public Lending(Book book, ReaderDetails readerDetails, LendingNumber lendingNumber, LocalDate startDate,
+            LocalDate limitDate, LocalDate returnedDate, int fineValuePerDayInCents) {
+        try {
             this.book = Objects.requireNonNull(book);
             this.readerDetails = Objects.requireNonNull(readerDetails);
         } catch (NullPointerException e) {
@@ -84,123 +86,151 @@ public class Lending {
     }
 
     // Getters
-    public Book getBook() { return book; }
-    public ReaderDetails getReaderDetails() { return readerDetails; }
-    public LocalDate getStartDate() { return startDate; }
-    public LocalDate getLimitDate() { return limitDate; }
-    public LocalDate getReturnedDate() { return returnedDate; }
-    public String getCommentary() { return commentary; }
-    public String getLendingNumber() { return lendingNumber.toString(); }
-    public long getVersion() { return version; }
-    public String getTitle()
-    {
+    public Book getBook() {
+        return book;
+    }
+
+    public ReaderDetails getReaderDetails() {
+        return readerDetails;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getLimitDate() {
+        return limitDate;
+    }
+
+    public LocalDate getReturnedDate() {
+        return returnedDate;
+    }
+
+    public String getCommentary() {
+        return commentary;
+    }
+
+    public String getLendingNumber() {
+        return lendingNumber.toString();
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public String getTitle() {
         return this.book.getTitle().toString();
     }
 
     /**
-     * <p>Returns the number of days that the lending is/was past its due date</p>
-     * @return      If the book was returned on time, or there is still time for it be returned, returns 0.
-     * If the book has been returned with delay, returns the number of days of delay.
-     * If the book has not been returned, returns the number of days
-     * past its limit date.
+     * <p>
+     * Returns the number of days that the lending is/was past its due date
+     * </p>
+     * 
+     * @return If the book was returned on time, or there is still time for it be
+     *         returned, returns 0.
+     *         If the book has been returned with delay, returns the number of days
+     *         of delay.
+     *         If the book has not been returned, returns the number of days
+     *         past its limit date.
      */
-    public int getDaysDelayed()
-    {
-        if(returnedDate != null)
-        {
+    public int getDaysDelayed() {
+        if (returnedDate != null) {
             return Math.max((int) ChronoUnit.DAYS.between(limitDate, returnedDate), 0);
-        }
-        else
-        {
+        } else {
             return Math.max((int) ChronoUnit.DAYS.between(limitDate, LocalDate.now()), 0);
 
         }
     }
-    public Optional<Integer> getFineValueInCents()
-    {
+
+    public Optional<Integer> getFineValueInCents() {
         int days = getDaysDelayed();
         return days > 0 ? Optional.of(fineValuePerDayInCents * days) : Optional.empty();
     }
-    public int getFineValuePerDayInCents() { return fineValuePerDayInCents; }
-    public Optional<Integer> getDaysUntilReturn()
-    {
+
+    public int getFineValuePerDayInCents() {
+        return fineValuePerDayInCents;
+    }
+
+    public Optional<Integer> getDaysUntilReturn() {
         setDaysUntilReturn();
         return Optional.ofNullable(daysUntilReturn);
     }
 
-    public Optional<Integer> getDaysOverdue()
-    {
+    public Optional<Integer> getDaysOverdue() {
         setDaysOverdue();
         return Optional.ofNullable(daysOverdue);
     }
 
-
     // Setters
     /**
-     * <p>Sets {@code commentary} and the current date as {@code returnedDate}.
-     * <p>If {@code returnedDate} is after {@code limitDate}, fine is applied with corresponding value.
+     * <p>
+     * Sets {@code commentary} and the current date as {@code returnedDate}.
+     * <p>
+     * If {@code returnedDate} is after {@code limitDate}, fine is applied with
+     * corresponding value.
      *
-     * @param       desiredVersion to prevent editing a stale object.
-     * @param       commentary written by a reader.
-     * @throws      StaleObjectStateException if object was already modified by another user.
-     * @throws      IllegalArgumentException  if {@code returnedDate} already has a value.
+     * @param desiredVersion to prevent editing a stale object.
+     * @param commentary     written by a reader.
+     * @throws StaleObjectStateException if object was already modified by another
+     *                                   user.
+     * @throws IllegalArgumentException  if {@code returnedDate} already has a
+     *                                   value.
      */
-    public void setReturned(final long desiredVersion, final String commentary){
+    public void setReturned(final long desiredVersion, final String commentary) {
 
-        if (this.returnedDate != null)
-        {
+        if (this.returnedDate != null) {
             throw new IllegalArgumentException("book has already been returned!");
         }
 
         // check current version
-        if (this.version != desiredVersion)
-        {
+        if (this.version != desiredVersion) {
             throw new StaleObjectStateException("Object was already modified by another user", this.pk);
         }
 
-        if(commentary != null)
-        {
+        if (commentary != null) {
             this.commentary = commentary;
         }
 
         this.returnedDate = LocalDate.now();
     }
 
-    private void setDaysUntilReturn(){
+    private void setDaysUntilReturn() {
         int daysUntilReturn = (int) ChronoUnit.DAYS.between(LocalDate.now(), this.limitDate);
-        if(this.returnedDate != null || daysUntilReturn < 0){
+        if (this.returnedDate != null || daysUntilReturn < 0) {
             this.daysUntilReturn = null;
-        }else{
+        } else {
             this.daysUntilReturn = daysUntilReturn;
         }
     }
 
-    private void setDaysOverdue(){
+    private void setDaysOverdue() {
         int days = getDaysDelayed();
-        if(days > 0){
+        if (days > 0) {
             this.daysOverdue = days;
-        }else{
+        } else {
             this.daysOverdue = null;
         }
     }
 
-    protected Lending() {}
+    protected Lending() {
+    }
 
-    /**Factory method meant to be only used in bootstrapping.*/
+    /** Factory method meant to be only used in bootstrapping. */
     public static Lending newBootstrappingLending(Book book,
-                                                  ReaderDetails readerDetails,
-                                                  int year,
-                                                  int seq,
-                                                  LocalDate startDate,
-                                                  LocalDate returnedDate,
-                                                  int lendingDuration,
-                                                  int fineValuePerDayInCents){
+            ReaderDetails readerDetails,
+            int year,
+            int seq,
+            LocalDate startDate,
+            LocalDate returnedDate,
+            int lendingDuration,
+            int fineValuePerDayInCents) {
         Lending lending = new Lending();
 
         try {
             lending.book = Objects.requireNonNull(book);
             lending.readerDetails = Objects.requireNonNull(readerDetails);
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new IllegalArgumentException("Null objects passed to lending");
         }
         lending.lendingNumber = new LendingNumber(year, seq);

@@ -31,7 +31,8 @@ public abstract class BookViewMapper extends MapperInterface {
 
     public abstract List<BookCountView> toBookCountView(List<BookCountDTO> bookCountDtos);
 
-    public abstract BookAverageLendingDurationView toBookAverageLendingDurationView(Book book, Double averageLendingDuration);
+    public abstract BookAverageLendingDurationView toBookAverageLendingDurationView(Book book,
+            Double averageLendingDuration);
 
     protected List<String> mapAuthors(List<Author> authors) {
         return authors.stream()
@@ -67,9 +68,9 @@ public abstract class BookViewMapper extends MapperInterface {
         return links;
     }
 
-
     protected String generatePhotoUrl(Book book) {
         String isbn = book.getIsbn();
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/books/{isbn}/photo").buildAndExpand(isbn).toUri().toString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/books/{isbn}/photo").buildAndExpand(isbn)
+                .toUri().toString();
     }
 }
