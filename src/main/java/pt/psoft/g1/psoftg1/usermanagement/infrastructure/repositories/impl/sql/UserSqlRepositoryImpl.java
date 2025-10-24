@@ -9,7 +9,6 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import pt.psoft.g1.psoftg1.shared.services.Page;
@@ -27,22 +26,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * SQL implementation of UserRepository using UserSqlEntity.
+ */
 @Profile("sql")
 @Primary
 @Repository
 @RequiredArgsConstructor
-@Component
-public class UserRepositoryImpl implements UserRepository
-{
+public class UserSqlRepositoryImpl implements UserRepository {
+
     private final SpringDataUserRepository userRepo;
     private final UserEntityMapper userEntityMapper;
     private final EntityManager em;
 
     @Override
-    public <S extends User> List<S> saveAll(Iterable<S> entities)
-    {
+    public <S extends User> List<S> saveAll(Iterable<S> entities) {
         List<S> savedEntities = new ArrayList<>();
-
         List<UserSqlEntity> userEntitiesToSave = new ArrayList<>();
 
         for (S entity : entities) {
@@ -53,13 +52,11 @@ public class UserRepositoryImpl implements UserRepository
             savedEntities.add((S) userEntityMapper.toModel(userEntity));
         }
 
-
         return savedEntities;
     }
 
     @Override
-    public <S extends User> S save(S entity)
-    {
+    public <S extends User> S save(S entity) {
         if (entity instanceof Reader) {
             ReaderSqlEntity readerEntity = userEntityMapper.toEntity((Reader) entity);
             ReaderSqlEntity savedEntity = userRepo.save(readerEntity);
@@ -80,36 +77,19 @@ public class UserRepositoryImpl implements UserRepository
     }
 
     @Override
-    public Optional<User> findById(Long objectId)
-    {
+    public Optional<User> findById(Long objectId) {
         Optional<UserSqlEntity> entityOpt = userRepo.findById(objectId);
-        if (entityOpt.isPresent())
-        {
-            return Optional.of(userEntityMapper.toModel(entityOpt.get()));
-        }
-        else
-        {
-            return Optional.empty();
-        }
+        return entityOpt.map(userEntityMapper::toModel);
     }
 
     @Override
-    public Optional<User> findByUsername(String username)
-    {
+    public Optional<User> findByUsername(String username) {
         Optional<UserSqlEntity> entityOpt = userRepo.findByUsername(username);
-        if (entityOpt.isPresent())
-        {
-            return Optional.of(userEntityMapper.toModel(entityOpt.get()));
-        }
-        else
-        {
-            return Optional.empty();
-        }
+        return entityOpt.map(userEntityMapper::toModel);
     }
 
     @Override
-    public List<User> searchUsers(Page page, SearchUsersQuery query)
-    {
+    public List<User> searchUsers(Page page, SearchUsersQuery query) {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<UserSqlEntity> cq = cb.createQuery(UserSqlEntity.class);
         final Root<UserSqlEntity> root = cq.from(UserSqlEntity.class);
@@ -135,7 +115,6 @@ public class UserRepositoryImpl implements UserRepository
         q.setMaxResults(page.getLimit());
 
         List<User> users = new ArrayList<>();
-
         for (UserSqlEntity userEntity : q.getResultList()) {
             users.add(userEntityMapper.toModel(userEntity));
         }
@@ -144,11 +123,9 @@ public class UserRepositoryImpl implements UserRepository
     }
 
     @Override
-    public List<User> findByNameName(String name)
-    {
+    public List<User> findByNameName(String name) {
         List<User> users = new ArrayList<>();
-        for (UserSqlEntity r: userRepo.findByNameName(name))
-        {
+        for (UserSqlEntity r : userRepo.findByNameName(name)) {
             users.add(userEntityMapper.toModel(r));
         }
 
@@ -156,15 +133,15 @@ public class UserRepositoryImpl implements UserRepository
     }
 
     @Override
-    public List<User> findByNameNameContains(String name)
-    {
-        return null;
+    public List<User> findByNameNameContains(String name) {
+        // TODO: Implementar método
+        return new ArrayList<>();
     }
 
     @Override
-    public void delete(User user)
-    {
-
+    public void delete(User user) {
+        UserSqlEntity entity = userEntityMapper.toEntity(user);
+        userRepo.delete(entity);
     }
 
 }

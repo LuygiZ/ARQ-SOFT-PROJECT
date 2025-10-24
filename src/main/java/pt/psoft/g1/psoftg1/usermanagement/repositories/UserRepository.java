@@ -3,6 +3,7 @@ package pt.psoft.g1.psoftg1.usermanagement.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.stereotype.Repository;
 import pt.psoft.g1.psoftg1.exceptions.NotFoundException;
 import pt.psoft.g1.psoftg1.shared.services.Page;
 import pt.psoft.g1.psoftg1.usermanagement.model.User;
