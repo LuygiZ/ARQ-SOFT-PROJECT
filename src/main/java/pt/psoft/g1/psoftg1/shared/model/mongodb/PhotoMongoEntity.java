@@ -1,30 +1,33 @@
 package pt.psoft.g1.psoftg1.shared.model.mongodb;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import jakarta.validation.constraints.NotNull;
+
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.nio.file.Path;
-
-@Entity
+@Document(collection = "photos")
+@Profile("mongodb")
+@Setter
+@Getter
+@Primary
 public class PhotoMongoEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long pk;
 
+    @Id
+    private String photoId;
+
+    @Field("photoFile")
     @NotNull
-    @Setter
-    @Getter
     private String photoFile;
 
     protected PhotoMongoEntity() {
     }
 
-    public PhotoMongoEntity(Path photoPath) {
-        setPhotoFile(photoPath.toString());
+    public PhotoMongoEntity(String photoFile) {
+        setPhotoFile(photoFile);
     }
 }

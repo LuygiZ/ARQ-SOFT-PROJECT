@@ -1,32 +1,33 @@
 package pt.psoft.g1.psoftg1.usermanagement.model.mongodb;
 
-import jakarta.persistence.Entity;
+import java.time.LocalDateTime;
+import java.util.Set;
 
-@Entity
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import pt.psoft.g1.psoftg1.shared.model.Name;
+import pt.psoft.g1.psoftg1.usermanagement.model.Role;
+
+@Document(collection = "readers")
+@Profile("mongodb")
+@Primary
 public class ReaderMongoEntity extends UserMongoEntity {
     protected ReaderMongoEntity() {
         // for ORM only
     }
 
-    public ReaderMongoEntity(String username, String password) {
-        super(username, password);
-        this.addAuthority(new Role(Role.READER));
+    public ReaderMongoEntity(String username,
+            String password,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt,
+            String createdBy,
+            String modifiedBy,
+            boolean enabled,
+            Name name,
+            Set<Role> authorities) {
+        super(username, password, createdAt, modifiedAt, createdBy, modifiedBy, enabled, name, authorities);
     }
 
-    /**
-     * factory method. since mapstruct does not handle protected/private setters
-     * neither more than one public constructor, we use these factory methods for
-     * helper creation scenarios
-     *
-     * @param username
-     * @param password
-     * @param name
-     * @return
-     */
-
-    public static ReaderMongoEntity newReader(final String username, final String password, final String name) {
-        final var u = new ReaderMongoEntity(username, password);
-        u.setName(name);
-        return u;
-    }
 }

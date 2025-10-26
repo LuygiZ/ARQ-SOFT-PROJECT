@@ -1,33 +1,38 @@
 package pt.psoft.g1.psoftg1.usermanagement.model.mongodb;
 
-import jakarta.persistence.Entity;
-import pt.psoft.g1.psoftg1.shared.model.Name;
+import java.time.LocalDateTime;
+import java.util.Set;
 
-@Entity
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Getter;
+import lombok.Setter;
+import pt.psoft.g1.psoftg1.shared.model.Name;
+import pt.psoft.g1.psoftg1.usermanagement.model.Role;
+
+@Document(collection = "librarians")
+@Profile("mongodb")
+@Getter
+@Setter
+@Primary
 public class LibrarianMongoEntity extends UserMongoEntity {
     protected LibrarianMongoEntity() {
         // for ORM only
     }
 
-    public LibrarianMongoEntity(String username, String password) {
-        super(username, password);
+    public LibrarianMongoEntity(
+            String username,
+            String password,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt,
+            String createdBy,
+            String modifiedBy,
+            boolean enabled,
+            Name name,
+            Set<Role> authorities) {
+        super(username, password, createdAt, modifiedAt, createdBy, modifiedBy, enabled, name, authorities);
     }
 
-    /**
-     * factory method. since mapstruct does not handle protected/private setters
-     * neither more than one public constructor, we use these factory methods for
-     * helper creation scenarios
-     *
-     * @param username
-     * @param password
-     * @param name
-     * @return
-     */
-
-    public static LibrarianMongoEntity newLibrarian(final String username, final String password, final String name) {
-        final var u = new LibrarianMongoEntity(username, password);
-        u.setName(name);
-        u.addAuthority(new Role(Role.LIBRARIAN));
-        return u;
-    }
 }

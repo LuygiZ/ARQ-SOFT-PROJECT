@@ -18,21 +18,6 @@ import pt.psoft.g1.psoftg1.readermanagement.model.mongodb.ReaderDetailsMongoEnti
 
 import java.time.LocalDate;
 
-/**
- * The {@code Lending} class associates a {@code Reader} and a {@code Book}.
- * <p>
- * It stores the date it was registered, the date it is supposed to
- * be returned, and the date it actually was returned.
- * It also stores an optional reader {@code commentary} (submitted at the time
- * of the return) and
- * the {@code Fine}, if applicable.
- * <p>
- * It is identified in the system by an auto-generated {@code id}, and has a
- * unique-constrained
- * natural key ({@code LendingNumber}) with its own business rules.
- * 
- * @author rmfranca
- */
 @Getter
 @Setter
 @Document(collection = "lendings")
@@ -70,11 +55,9 @@ public class LendingMongoEntity {
     @Field("commentary")
     private String commentary = null;
 
-    @Transient
     @Field("daysUntilReturn")
     private Integer daysUntilReturn;
 
-    @Transient
     @Field("daysOverdue")
     private Integer daysOverdue;
 

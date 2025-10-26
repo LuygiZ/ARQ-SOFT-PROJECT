@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * The {@code Fine} class models a fine applied when a lending is past its due
@@ -29,23 +30,18 @@ public class FineMongoEntity {
     private String fineId;
 
     @PositiveOrZero
+    @Field("finevalueperdayincents")
     private int fineValuePerDayInCents;
 
     /** Fine value in Euro cents */
     @PositiveOrZero
-
+    @Field("centsValue")
     private int centsValue;
 
     @DBRef
     @Indexed(unique = true)
     private LendingMongoEntity lending;
 
-    /**
-     * Constructs a new {@code Fine} object. Sets the current value of the fine,
-     * as well as the fine value per day at the time of creation.
-     * 
-     * @param lending transaction which generates this fine.
-     */
     public FineMongoEntity(int fineValuePerDayInCents, int centsValue, LendingMongoEntity lending) {
         this.fineValuePerDayInCents = fineValuePerDayInCents;
         this.centsValue = centsValue;

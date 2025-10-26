@@ -24,82 +24,69 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import pt.psoft.g1.psoftg1.shared.model.Name;
+import org.springframework.data.annotation.Version;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import pt.psoft.g1.psoftg1.shared.model.Name;
+import pt.psoft.g1.psoftg1.usermanagement.model.Role;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Based on https://github.com/Yoh0xFF/java-spring-security-example
- *
- */
-@Entity
-@Table(name = "T_USER")
-@EntityListeners(AuditingEntityListener.class)
-public class UserMongoEntity implements UserDetails {
+@Profile("mongodb")
+@Getter
+@Setter
+@Primary
+@Document(collection = "users")
+public class UserMongoEntity {
 
-	private static final long serialVersionUID = 1L;
-
-	// database primary key
 	@Id
-	@GeneratedValue
-	@Getter
-	@Column(name = "USER_ID")
-	private Long id;
+	private String id;
 
-	// optimistic lock concurrency control
 	@Version
 	private Long version;
 
 	// auditing info
 	@CreatedDate
-	@Column(nullable = false, updatable = false)
-	@Getter
+	@Field("created_at")
 	private LocalDateTime createdAt;
 
 	// auditing info
 	@LastModifiedDate
-	@Column(nullable = false)
-	@Getter
+	@Field("modified_at")
 	private LocalDateTime modifiedAt;
 
 	// auditing info
 	@CreatedBy
-	@Column(nullable = false, updatable = false)
-	@Getter
+	@Field("created_by")
 	private String createdBy;
 
 	// auditing info
 	@LastModifiedBy
-	@Column(nullable = false)
+	@Field("modified_by")
 	private String modifiedBy;
 
-	@Setter
-	@Getter
 	private boolean enabled = true;
 
-	@Setter
-	@Column(unique = true, /* updatable = false, */ nullable = false)
+	@Field("username")
 	@Email
-	@Getter
 	@NotNull
 	@NotBlank
 	private String username;
 
-	@Column(nullable = false)
+	@Field("password")
 	@Getter
 	@NotNull
 	@NotBlank
@@ -107,88 +94,51 @@ public class UserMongoEntity implements UserDetails {
 
 	@Getter
 	// @Setter
-	@Embedded
+	@Field("name")
 	private Name name;
 
-	@ElementCollection
-	@Getter
+	@Field("authorities")
 	private final Set<Role> authorities = new HashSet<>();
 
 	protected UserMongoEntity() {
 		// for ORM only
 	}
 
-	/**
-	 *
-	 * @param username
-	 * @param password
-	 */
-	public UserMongoEntity(final String username, final String password) {
+	public UserMongoEntity(
+			String username,
+			String password,
+			LocalDateTime createdAt,
+			LocalDateTime modifiedAt,
+			String createdBy,
+			String modifiedBy,
+			boolean enabled,
+			Name name,
+			Set<Role> authorities) {
+
 		this.username = username;
-		setPassword(password);
+		this.password = password;
+		this.createdAt = createdAt;
+		this.modifiedAt = modifiedAt;
+		this.createdBy = createdBy;
+		this.modifiedBy = modifiedBy;
+		this.enabled = enabled;
+		this.name = name;
+		this.authorities.addAll(authorities);
 	}
 
-	/**
-	 * factory method. since mapstruct does not handle protected/private setters
-	 * neither more than one public constructor, we use these factory methods for
-	 * helper creation scenarios
-	 *
-	 * @param username
-	 * @param password
-	 * @param name
-	 * @return
-	 */
-	public static UserMongoEntity newUser(final String username, final String password, final String name) {
-		final var u = new UserMongoEntity(username, password);
-		u.setName(name);
-		return u;
-	}
+	// @Override
+	// public boolean isAccountNonExpired() {
+	// return isEnabled();
+	// }
 
-	/**
-	 * factory method. since mapstruct does not handle protected/private setters
-	 * neither more than one public constructor, we use these factory methods for
-	 * helper creation scenarios
-	 *
-	 * @param username
-	 * @param password
-	 * @param name
-	 * @param role
-	 * @return
-	 */
-	public static UserMongoEntity newUser(final String username, final String password, final String name,
-			final String role) {
-		final var u = new UserMongoEntity(username, password);
-		u.setName(name);
-		u.addAuthority(new Role(role));
-		return u;
-	}
+	// @Override
+	// public boolean isAccountNonLocked() {
+	// return isEnabled();
+	// }
 
-	public void setPassword(final String password) {
-		Password passwordCheck = new Password(password);
-		final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		this.password = passwordEncoder.encode(password);
-	}
+	// @Override
+	// public boolean isCredentialsNonExpired() {
+	// return isEnabled();
+	// }
 
-	public void addAuthority(final Role r) {
-		authorities.add(r);
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return isEnabled();
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return isEnabled();
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return isEnabled();
-	}
-
-	public void setName(String name) {
-		this.name = new Name(name);
-	}
 }

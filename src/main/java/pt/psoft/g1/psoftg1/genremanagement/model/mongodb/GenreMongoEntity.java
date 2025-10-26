@@ -7,39 +7,28 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.Setter;
+import pt.psoft.g1.psoftg1.genremanagement.model.Genre;
 
 @Profile("mongodb")
 @Document(collection = "genres")
+@Getter
+@Setter
 public class GenreMongoEntity {
 
-    private final int GENRE_MAX_LENGTH = 100;
     @Id
-    String genreId;
+    public String genreId;
 
-    @Size(min = 1, max = GENRE_MAX_LENGTH, message = "Genre name must be between 1 and 100 characters")
-    @Getter
+    @Size(min = 1, max = Genre.GENRE_MAX_LENGTH, message = "Genre name must be between 1 and 100 characters")
     @Field("genre")
-    String genre;
+    public String genre;
 
     public GenreMongoEntity(String genre) {
-        setGenre(genre);
+        this.genre = genre;
     }
 
     protected GenreMongoEntity() {
         // for ORM only
     }
 
-    private void setGenre(String genre) {
-        if (genre == null)
-            throw new IllegalArgumentException("Genre cannot be null");
-        if (genre.isBlank())
-            throw new IllegalArgumentException("Genre cannot be blank");
-        if (genre.length() > GENRE_MAX_LENGTH)
-            throw new IllegalArgumentException("Genre has a maximum of 4096 characters");
-        this.genre = genre;
-    }
-
-    public String toString() {
-        return genre;
-    }
 }
