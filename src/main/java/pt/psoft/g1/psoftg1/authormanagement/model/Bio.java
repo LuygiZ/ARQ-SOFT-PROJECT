@@ -29,8 +29,7 @@ public class Bio {
         return bio;
     }
 
-    public String getValue()
-    {
+    public String getValue() {
         return bio;
     }
 }
