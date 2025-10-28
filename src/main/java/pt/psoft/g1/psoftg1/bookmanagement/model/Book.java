@@ -115,7 +115,7 @@ public class Book extends EntityWithPhoto {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
 
-        setPhotoInternal((String) null);
+        setPhotoInternal((String)null);
     }
 
     /**

@@ -23,7 +23,7 @@ public class NameSqlEntity {
     @Setter
     private String name;
 
-    protected NameSqlEntity()
+    public NameSqlEntity()
     {
 
     }

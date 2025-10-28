@@ -3,6 +3,7 @@ package pt.psoft.g1.psoftg1.usermanagement.model.mongodb;
 import jakarta.persistence.Entity;
 import pt.psoft.g1.psoftg1.shared.model.Name;
 
+/*
 @Entity
 public class LibrarianMongoEntity extends UserMongoEntity {
     protected LibrarianMongoEntity() {
@@ -22,7 +23,7 @@ public class LibrarianMongoEntity extends UserMongoEntity {
      * @param password
      * @param name
      * @return
-     */
+
 
     public static LibrarianMongoEntity newLibrarian(final String username, final String password, final String name) {
         final var u = new LibrarianMongoEntity(username, password);
@@ -31,3 +32,4 @@ public class LibrarianMongoEntity extends UserMongoEntity {
         return u;
     }
 }
+        */

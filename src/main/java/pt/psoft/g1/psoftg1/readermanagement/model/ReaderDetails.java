@@ -11,8 +11,7 @@ import java.nio.file.InvalidPathException;
 import java.util.List;
 
 public class ReaderDetails extends EntityWithPhoto {
-
-    // Fields
+    public Long pk;
     private Reader reader;
     private ReaderNumber readerNumber;
     private BirthDate birthDate;
@@ -23,187 +22,140 @@ public class ReaderDetails extends EntityWithPhoto {
     private Long version;
     private List<Genre> interestList;
 
-    // Constructor
-    public ReaderDetails(int readerNumber, Reader reader, String birthDate, String phoneNumber,
+    public ReaderDetails() {}
+
+    // Construtor principal
+    public ReaderDetails(ReaderNumber readerNumber, Reader reader, BirthDate birthDate, PhoneNumber phoneNumber,
                          boolean gdpr, boolean marketing, boolean thirdParty,
-                         String photoURI, List<Genre> interestList) {
-        validateConstructorArguments(reader, phoneNumber, gdpr);
+                         String photoURI, List<Genre> interestList)
+    {
+        if (reader == null || phoneNumber == null)
+        {
+            throw new IllegalArgumentException("Provided argument resolves to null object");
+        }
+
+        if (!gdpr)
+        {
+            throw new IllegalArgumentException("Readers must agree with the GDPR rules");
+        }
 
         setReader(reader);
-        setReaderNumber(new ReaderNumber(readerNumber));
-        setBirthDate(new BirthDate(birthDate));
-        setPhoneNumber(new PhoneNumber(phoneNumber));
+        setReaderNumber(readerNumber);
+        setPhoneNumber(phoneNumber);
+        setBirthDate(birthDate);
         setGdprConsent(gdpr);
+        setPhotoInternal(photoURI);
         setMarketingConsent(marketing);
         setThirdPartySharingConsent(thirdParty);
         setPhotoInternal(photoURI);
         setInterestList(interestList);
     }
 
-    protected ReaderDetails() {
-        // smth here
+    public ReaderDetails(int readerNumber, Reader reader, String birthDate, String phoneNumber,
+                         boolean gdpr, boolean marketing, boolean thirdParty,
+                         String photoURI, List<Genre> interestList)
+    {
+        this(new ReaderNumber(readerNumber), reader, new BirthDate(birthDate), new PhoneNumber(phoneNumber), gdpr, marketing, thirdParty, photoURI, interestList);
     }
 
-    // Business Methods
-    public void applyPatch(final long currentVersion, final UpdateReaderRequest request,
-                           String photoURI, List<Genre> interestList) {
-        validateVersion(currentVersion);
+    // Getters and Setters
+    public Long getPk() { return pk; }
 
-        updateReaderInfo(request);
-        updatePersonalInfo(request);
-        updateConsents(request);
-        updatePhoto(photoURI);
-        updateInterestList(interestList);
-    }
+    public Reader getReader() { return reader; }
+    public void setReader(Reader reader) { this.reader = reader; }
 
-    public void removePhoto(long desiredVersion) {
-        validateVersion(desiredVersion);
-        setPhotoInternal((String) null);
-    }
-
-    // Getters
-    public Reader getReader() {
-        return reader;
-    }
-
-    public String getReaderNumber() {
-        return this.readerNumber.toString();
-    }
-
-    public BirthDate getBirthDate() { return birthDate; }
-
-    public String getPhoneNumber() {
-        return this.phoneNumber.toString();
-    }
-
-    public boolean isGdprConsent() {
-        return gdprConsent;
-    }
-
-    public boolean isMarketingConsent() {
-        return marketingConsent;
-    }
-
-    public boolean isThirdPartySharingConsent() {
-        return thirdPartySharingConsent;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public List<Genre> getInterestList() {
-        return interestList;
-    }
-
-    // Private Setters
-    private void setReader(Reader reader) {
-        if (reader != null) {
-            this.reader = reader;
-        }
-    }
-
-    private void setReaderNumber(ReaderNumber readerNumber) {
-        if (readerNumber != null) {
+    public String getReaderNumber() { return readerNumber.getReaderNumber(); }
+    public void setReaderNumber(ReaderNumber readerNumber) {
+        if(readerNumber != null) {
             this.readerNumber = readerNumber;
         }
     }
 
-    private void setBirthDate(BirthDate birthDate) {
-        if (birthDate != null) {
-            this.birthDate = birthDate;
+    public void setVersion(Long version) { this.version = version;}
+
+    public BirthDate getBirthDate() { return birthDate; }
+    public void setBirthDate(BirthDate date) {
+        if(date != null) {
+            this.birthDate = date;
         }
     }
 
-    private void setPhoneNumber(PhoneNumber phoneNumber) {
-        if (phoneNumber != null) {
-            this.phoneNumber = phoneNumber;
+    public String getPhoneNumber() { return phoneNumber.getPhoneNumber(); }
+    public void setPhoneNumber(PhoneNumber number) {
+        if(number != null) {
+            this.phoneNumber = number;
         }
     }
+    public boolean isGdprConsent() { return gdprConsent; }
+    public void setGdprConsent(boolean gdprConsent) { this.gdprConsent = gdprConsent; }
 
-    private void setGdprConsent(boolean gdprConsent) {
-        this.gdprConsent = gdprConsent;
-    }
+    public boolean isMarketingConsent() { return marketingConsent; }
+    public void setMarketingConsent(boolean marketingConsent) { this.marketingConsent = marketingConsent; }
 
-    private void setMarketingConsent(boolean marketingConsent) {
-        this.marketingConsent = marketingConsent;
-    }
+    public boolean isThirdPartySharingConsent() { return thirdPartySharingConsent; }
+    public void setThirdPartySharingConsent(boolean thirdPartySharingConsent) { this.thirdPartySharingConsent = thirdPartySharingConsent; }
 
-    private void setThirdPartySharingConsent(boolean thirdPartySharingConsent) {
-        this.thirdPartySharingConsent = thirdPartySharingConsent;
-    }
+    public Long getVersion() { return version; }
+    public List<Genre> getInterestList() { return interestList; }
+    public void setInterestList(List<Genre> interestList) { this.interestList = interestList; }
 
-    private void setInterestList(List<Genre> interestList) {
-        if (interestList != null) {
-            this.interestList = interestList;
-        }
-    }
-
-    // Validation Methods
-    private void validateConstructorArguments(Reader reader, String phoneNumber, boolean gdpr) {
-        if (reader == null || phoneNumber == null) {
-            throw new IllegalArgumentException("Provided argument resolves to null object");
-        }
-
-        if (!gdpr) {
-            throw new IllegalArgumentException("Readers must agree with the GDPR rules");
-        }
-    }
-
-    private void validateVersion(long currentVersion) {
-        if (currentVersion != this.version) {
+    // Método de patch
+    public void applyPatch(long currentVersion, UpdateReaderRequest request, String photoURI, List<Genre> interestList)
+    {
+        if (currentVersion != this.version)
+        {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
     }
 
-    // Helper Methods for applyPatch
-    private void updateReaderInfo(UpdateReaderRequest request) {
-        if (request.getUsername() != null) {
-            this.reader.setUsername(request.getUsername());
+        if (request.getUsername() != null)
+        {
+            reader.setUsername(request.getUsername());
         }
-
-        if (request.getPassword() != null) {
-            this.reader.setPassword(request.getPassword());
+        if (request.getPassword() != null)
+        {
+            reader.setPassword(request.getPassword());
         }
-
-        if (request.getFullName() != null) {
-            this.reader.setName(request.getFullName());
+        if (request.getFullName() != null)
+        {
+            reader.setName(request.getFullName());
         }
-    }
-
-    private void updatePersonalInfo(UpdateReaderRequest request) {
-        if (request.getBirthDate() != null) {
-            setBirthDate(new BirthDate(request.getBirthDate()));
+        if (request.getBirthDate() != null)
+        {
+            birthDate = new BirthDate(request.getBirthDate());
         }
-
-        if (request.getPhoneNumber() != null) {
-            setPhoneNumber(new PhoneNumber(request.getPhoneNumber()));
+        if (request.getPhoneNumber() != null)
+        {
+            phoneNumber = new PhoneNumber(request.getPhoneNumber());
         }
-    }
+        this.marketingConsent = request.getMarketing();
+        this.thirdPartySharingConsent = request.getThirdParty();
 
-    private void updateConsents(UpdateReaderRequest request) {
-        if (request.getMarketing() != this.marketingConsent) {
-            setMarketingConsent(request.getMarketing());
-        }
-
-        if (request.getThirdParty() != this.thirdPartySharingConsent) {
-            setThirdPartySharingConsent(request.getThirdParty());
-        }
-    }
-
-    private void updatePhoto(String photoURI) {
-        if (photoURI != null) {
-            try {
+        if (photoURI != null)
+        {
+            try
+            {
                 setPhotoInternal(photoURI);
-            } catch (InvalidPathException ignored) {
-                // Photo path is invalid, skip update
+            }
+            catch (InvalidPathException ignored)
+            {
+
             }
         }
-    }
 
-    private void updateInterestList(List<Genre> interestList) {
-        if (interestList != null) {
+        if (interestList != null)
+        {
             this.interestList = interestList;
         }
+    }
+
+    public void removePhoto(long desiredVersion)
+    {
+        if(desiredVersion != this.version)
+        {
+            throw new ConflictException("Provided version does not match latest version of this object");
+        }
+
+        setPhotoInternal((String)null);
     }
 }
