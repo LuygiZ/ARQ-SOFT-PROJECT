@@ -1,5 +1,7 @@
 package pt.psoft.g1.psoftg1.lendingmanagement.model;
 
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
 /**

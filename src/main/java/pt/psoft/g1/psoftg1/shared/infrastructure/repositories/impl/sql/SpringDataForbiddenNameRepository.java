@@ -1,4 +1,4 @@
-package pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl;
+package pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -10,24 +10,25 @@ import pt.psoft.g1.psoftg1.shared.model.Photo;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class Author extends EntityWithPhoto {
-    private Long authorNumber;
+public class Author extends EntityWithPhoto
+{
+    // TODO: Nao deve ser suposto ser publico
+    public Long authorNumber;
     private long version;
     private Name name;
     private Bio bio;
+    public Author() { }
 
-    public Author(Name name, Bio bio, Photo photo) {
+    public Author(String name, String bio, String photoURI)
+    {
+        this(new Name(name), new Bio(bio), photoURI == null ? null : new Photo(Paths.get(photoURI)));
+    }
+    public Author(Name name, Bio bio, Photo photoURI)
+    {
         setName(name);
         setBio(bio);
-        setPhotoInternal(photo);
+        setPhotoInternal(photoURI);
         this.version = 0L;
-    }
-
-    public Author(String name, String bio, String photo) {
-        this(new Name(name), new Bio(bio), new Photo(Paths.get(photo)));
-    }
-
-    public Author() {
     }
 
     // Getters
@@ -48,16 +49,20 @@ public class Author extends EntityWithPhoto {
     }
 
     // Setters
-    private void setName(Name name) {
-        if (name == null) {
+    public void setName(Name name)
+    {
+        if (name == null)
+        {
             throw new IllegalArgumentException("Name cannot be null");
         }
 
         this.name = name;
     }
 
-    private void setBio(Bio bio) {
-        if (bio == null) {
+    public void setBio(Bio bio)
+    {
+        if (bio == null)
+        {
             throw new IllegalArgumentException("Bio cannot be null");
         }
 
@@ -78,7 +83,8 @@ public class Author extends EntityWithPhoto {
             setBio(new Bio(request.getBio()));
         }
 
-        if (request.getPhoto() != null) {
+        if (request.getPhotoURI() != null)
+        {
             setPhotoInternal(request.getPhotoURI());
         }
     }

@@ -34,6 +34,7 @@ public class PhoneNumber
     }
 
     // Helper
+    @Override
     public String toString()
     {
         return phoneNumber;
