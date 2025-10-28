@@ -47,7 +47,6 @@ public class ReaderDetails extends EntityWithPhoto {
         setPhotoInternal(photoURI);
         setMarketingConsent(marketing);
         setThirdPartySharingConsent(thirdParty);
-        setPhotoInternal(photoURI);
         setInterestList(interestList);
     }
 
@@ -106,7 +105,6 @@ public class ReaderDetails extends EntityWithPhoto {
         {
             throw new ConflictException("Provided version does not match latest version of this object");
         }
-    }
 
         if (request.getUsername() != null)
         {

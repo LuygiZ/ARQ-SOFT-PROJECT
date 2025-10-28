@@ -49,9 +49,4 @@ public class Bio
     {
         return bio;
     }
-
-    public String getValue()
-    {
-        return bio;
-    }
 }
