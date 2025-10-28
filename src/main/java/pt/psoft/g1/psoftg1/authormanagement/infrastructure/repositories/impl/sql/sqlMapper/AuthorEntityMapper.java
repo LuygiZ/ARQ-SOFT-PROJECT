@@ -1,55 +1,47 @@
 package pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.sqlMapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import pt.psoft.g1.psoftg1.authormanagement.model.Author;
-import pt.psoft.g1.psoftg1.authormanagement.model.Bio;
 import pt.psoft.g1.psoftg1.authormanagement.model.sql.AuthorSqlEntity;
 import pt.psoft.g1.psoftg1.authormanagement.model.sql.BioSqlEntity;
-import pt.psoft.g1.psoftg1.shared.model.Photo;
+import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper.PhotoEntityMapper;
 import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper.NameEntityMapper;
-import pt.psoft.g1.psoftg1.shared.model.Name;
 import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
 import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 
-@Mapper(componentModel = "spring", uses = { NameEntityMapper.class, BioEntityMapper.class })
+@Mapper(componentModel = "spring", uses = { NameEntityMapper.class, BioEntityMapper.class, PhotoEntityMapper.class})
 public interface AuthorEntityMapper
 {
     Author toModel(AuthorSqlEntity entity);
-
-    @Mapping(source = "photo", target = "photoURI")
     AuthorSqlEntity toEntity(Author model);
 
-    default String map(Photo photo)
-    {
-        return photo == null ? null : photo.getPhotoFile();
+    // Mapping methods for Photo (Entity -> String)
+    default String map(PhotoSqlEntity entity) {
+        return entity == null ? null : entity.getPhotoFile();
     }
 
-    default String map(PhotoSqlEntity photo)
-    {
-        return photo == null ? null : photo.getPhotoFile();
+    // Mapping methods for Photo (String -> Entity)
+    default PhotoSqlEntity map(String photoFile) {
+        return photoFile == null ? null : new PhotoSqlEntity(photoFile);
     }
 
-    default String map(Name value)
-    {
-        return value == null ? null : value.getName();
+    // Mapping methods for Name (Entity -> String)
+    default String map(NameSqlEntity entity) {
+        return entity == null ? null : entity.getName();
     }
 
-    default String map(Bio value)
-    {
-        return value == null ? null : value.getValue();
+    // Mapping methods for Name (String -> Entity)
+    default NameSqlEntity mapToName(String name) {
+        return name == null ? null : new NameSqlEntity(name);
     }
 
-    default String map(BioSqlEntity value)
-    {
-        return value == null ? null : value.getBio();
+    // Mapping methods for Bio (Entity -> String)
+    default String map(BioSqlEntity entity) {
+        return entity == null ? null : entity.getBio();
     }
 
-    default NameSqlEntity map(String value) {
-        return value == null ? null : new NameSqlEntity(value);
-    }
-
-    default String map(NameSqlEntity value) {
-        return value == null ? null : value.getName();
+    // Mapping methods for Bio (String -> Entity)
+    default BioSqlEntity mapToBio(String bio) {
+        return bio == null ? null : new BioSqlEntity(bio);
     }
 }

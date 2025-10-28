@@ -22,7 +22,7 @@ public class GenreSqlEntity {
     @Getter
     private String genre;
 
-    protected GenreSqlEntity() { }
+    public GenreSqlEntity() { }
 
     public GenreSqlEntity(String genre) { setGenre(genre); }
 
@@ -32,7 +32,7 @@ public class GenreSqlEntity {
     }
 
     // Setter
-    private void setGenre(String genre) {
+    public void setGenre(String genre) {
         this.genre = genre;
     }
 }

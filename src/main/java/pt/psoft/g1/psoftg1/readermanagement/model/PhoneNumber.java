@@ -20,7 +20,16 @@ public class PhoneNumber {
         this.phoneNumber = number;
     }
 
-    public String toString() {
-        return this.phoneNumber;
+    // Getter
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
+
+    // Helper
+    @Override
+    public String toString()
+    {
+        return phoneNumber;
     }
 }

@@ -63,8 +63,8 @@ public class BookSqlEntity extends EntityWithPhoto {
     private void setTitle(TitleSqlEntity title) { this.title = title; }
     private void setIsbn(IsbnSqlEntity isbn) { this.isbn = isbn; }
     private void setDescription(DescriptionSqlEntity description) { this.description = description; }
-    private void setGenre(GenreSqlEntity genre) { this.genre = genre; }
-    private void setAuthors(List<AuthorSqlEntity> authors) { this.authors = authors; }
+    public void setGenre(GenreSqlEntity genre) { this.genre = genre; }
+    public void setAuthors(List<AuthorSqlEntity> authors) { this.authors = authors; }
 
     // Getters
     public String getDescription(){ return this.description.toString(); }

@@ -22,8 +22,8 @@ public interface UserRepository {
 
     default User getById(final Long id) {
         final Optional<User> maybeUser = findById(id);
-        return maybeUser.filter(User::isEnabled)
-                .orElseThrow(() -> new NotFoundException(User.class, id));
+        // throws 404 Not Found if the user does not exist or is not enabled
+        return maybeUser.filter(User::isEnabled).orElseThrow(() -> new NotFoundException(User.class, id));
     }
 
     Optional<User> findByUsername(String username);
@@ -31,8 +31,6 @@ public interface UserRepository {
     List<User> searchUsers(Page page, SearchUsersQuery query);
 
     List<User> findByNameName(String name);
-
     List<User> findByNameNameContains(String name);
-
     void delete(User user);
 }

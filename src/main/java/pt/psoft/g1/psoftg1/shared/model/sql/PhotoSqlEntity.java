@@ -23,7 +23,7 @@ public class PhotoSqlEntity {
     @Setter
     private String photoFile;
 
-    protected PhotoSqlEntity() { }
+    public PhotoSqlEntity() { }
 
     public PhotoSqlEntity(String photoFile)
     {

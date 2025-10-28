@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pt.psoft.g1.psoftg1.exceptions.NotFoundException;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.UserSqlEntity;
@@ -51,4 +52,8 @@ public interface SpringDataUserRepository extends CrudRepository<UserSqlEntity, 
     @Cacheable
     @Query("SELECT u FROM UserSqlEntity u WHERE u.name.name = ?1")
     List<UserSqlEntity> findByNameName(String name);
+
+    @Cacheable
+    @Query("SELECT u FROM UserSqlEntity u WHERE LOWER(u.name.name) LIKE LOWER(CONCAT('%', :namePart, '%'))")
+    List<UserSqlEntity> findByNameNameContains(@Param("namePart") String namePart);
 }
