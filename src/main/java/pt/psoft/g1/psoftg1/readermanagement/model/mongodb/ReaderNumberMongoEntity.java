@@ -1,7 +1,6 @@
 package pt.psoft.g1.psoftg1.readermanagement.model.mongodb;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;

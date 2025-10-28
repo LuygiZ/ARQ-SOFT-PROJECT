@@ -10,16 +10,16 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
-
+import pt.psoft.g1.psoftg1.shared.model.mongodb.EntityWithPhotoMongoEntity;
 import pt.psoft.g1.psoftg1.shared.model.mongodb.NameMongoEntity;
+import pt.psoft.g1.psoftg1.shared.model.mongodb.PhotoMongoEntity;
 
 @Document(collection = "authors")
 @Getter
 @Setter
 @Profile("mongodb")
 @Primary
-public class AuthorMongoEntity extends EntityWithPhoto {
+public class AuthorMongoEntity extends EntityWithPhotoMongoEntity {
 
     @Id
     private Long authorNumber;
@@ -33,10 +33,13 @@ public class AuthorMongoEntity extends EntityWithPhoto {
     @Field("bio")
     private BioMongoEntity bio;
 
-    public AuthorMongoEntity(NameMongoEntity name, BioMongoEntity bio, String photoURI) {
+    @Field("photo_uri")
+    private PhotoMongoEntity photo;
+
+    public AuthorMongoEntity(NameMongoEntity name, BioMongoEntity bio, PhotoMongoEntity photoURI) {
         this.name = name;
         this.bio = bio;
-        setPhotoInternal(photoURI);
+        this.photo = photoURI;
     }
 
     protected AuthorMongoEntity() {
