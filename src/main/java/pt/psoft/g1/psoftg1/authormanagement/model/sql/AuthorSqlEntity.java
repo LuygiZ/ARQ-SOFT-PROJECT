@@ -2,6 +2,7 @@ package pt.psoft.g1.psoftg1.authormanagement.model.sql;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoSqlEntity;
@@ -11,11 +12,12 @@ import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 @Profile("sql")
 @Primary
 @Entity
+@Getter
+@Setter
 public class AuthorSqlEntity extends EntityWithPhotoSqlEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "AUTHOR_NUMBER")
-    @Getter
     private Long authorNumber;
 
     @Version

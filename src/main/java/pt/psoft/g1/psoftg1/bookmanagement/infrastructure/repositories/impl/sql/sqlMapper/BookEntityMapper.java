@@ -1,22 +1,23 @@
-package pt.psoft.g1.psoftg1.bookmanagement.infrastructure.repositories.impl.sql.sqlMapper;
+package pt.psoft.g1.psoftg1.bookmanagement.infrastructure.repositories.impl.sql.sqlmapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.sqlMapper.AuthorEntityMapper;
+import pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.sqlmapper.AuthorEntityMapper;
 import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.DescriptionSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.IsbnSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.TitleSqlEntity;
 import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreSqlEntity;
-import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.sqlMapper.GenreEntityMapper;
-import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper.PhotoEntityMapper;
+import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.sqlmapper.GenreEntityMapper;
+import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlmapper.PhotoEntityMapper;
 
-@Mapper(componentModel = "spring", uses = {GenreEntityMapper.class, AuthorEntityMapper.class, PhotoEntityMapper.class})
-public interface BookEntityMapper
-{
-    @Mapping(target="photoURI", source="photo")
+@Mapper(componentModel = "spring", uses = { GenreEntityMapper.class, AuthorEntityMapper.class,
+        PhotoEntityMapper.class })
+public interface BookEntityMapper {
+    @Mapping(target = "photoURI", source = "photo")
     Book toModel(BookSqlEntity entity);
+
     BookSqlEntity toEntity(Book model);
 
     // Mapping methods for Title (Entity -> String)
@@ -26,7 +27,8 @@ public interface BookEntityMapper
 
     // Mapping methods for Title (String -> Entity)
     default TitleSqlEntity mapToTitle(String title) {
-        if (title == null) return null;
+        if (title == null)
+            return null;
         TitleSqlEntity entity = new TitleSqlEntity();
         entity.setTitle(title);
         return entity;
@@ -39,7 +41,8 @@ public interface BookEntityMapper
 
     // Mapping methods for Description (String -> Entity)
     default DescriptionSqlEntity mapToDescription(String description) {
-        if (description == null) return null;
+        if (description == null)
+            return null;
         DescriptionSqlEntity entity = new DescriptionSqlEntity();
         entity.setDescription(description);
         return entity;
@@ -52,7 +55,8 @@ public interface BookEntityMapper
 
     // Mapping methods for Genre (String -> Entity)
     default GenreSqlEntity mapToGenre(String genre) {
-        if (genre == null) return null;
+        if (genre == null)
+            return null;
         GenreSqlEntity entity = new GenreSqlEntity();
         entity.setGenre(genre);
         return entity;

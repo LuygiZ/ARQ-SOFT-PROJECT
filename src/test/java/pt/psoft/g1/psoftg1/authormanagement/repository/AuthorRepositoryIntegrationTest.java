@@ -15,7 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Based on https://www.baeldung.com/spring-boot-testing
- * <p>Adaptations to Junit 5 with ChatGPT
+ * <p>
+ * Adaptations to Junit 5 with ChatGPT
  */
 @ExtendWith(SpringExtension.class)
 @DataJpaTest

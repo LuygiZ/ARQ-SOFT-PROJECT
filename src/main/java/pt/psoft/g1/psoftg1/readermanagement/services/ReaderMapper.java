@@ -5,7 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.web.multipart.MultipartFile;
 import pt.psoft.g1.psoftg1.genremanagement.model.Genre;
-import pt.psoft.g1.psoftg1.readermanagement.infraestructure.repositories.impl.sql.sqlMapper.ReaderDetailsEntityMapper;
+import pt.psoft.g1.psoftg1.readermanagement.infrastructure.repositories.impl.sql.sqlmapper.ReaderDetailsEntityMapper;
 import pt.psoft.g1.psoftg1.readermanagement.model.ReaderDetails;
 import pt.psoft.g1.psoftg1.shared.model.Photo;
 import pt.psoft.g1.psoftg1.usermanagement.model.Reader;
@@ -16,9 +16,10 @@ import java.util.List;
 
 /**
  * Brief guide:
- * <a href="https://www.baeldung.com/mapstruct">https://www.baeldung.com/mapstruct</a>
- * */
-@Mapper(componentModel = "spring", uses = {ReaderService.class, UserService.class, ReaderDetailsEntityMapper.class})
+ * <a href=
+ * "https://www.baeldung.com/mapstruct">https://www.baeldung.com/mapstruct</a>
+ */
+@Mapper(componentModel = "spring", uses = { ReaderService.class, UserService.class, ReaderDetailsEntityMapper.class })
 public abstract class ReaderMapper {
 
     @Mapping(target = "username", source = "username")
@@ -34,5 +35,6 @@ public abstract class ReaderMapper {
     @Mapping(target = "photo", source = "photoURI")
     @Mapping(target = "interestList", source = "interestList")
     @Mapping(target = "pk", ignore = true)
-    public abstract ReaderDetails createReaderDetails(int readerNumber, Reader reader, CreateReaderRequest request, String photoURI, List<Genre> interestList);
+    public abstract ReaderDetails createReaderDetails(int readerNumber, Reader reader, CreateReaderRequest request,
+            String photoURI, List<Genre> interestList);
 }

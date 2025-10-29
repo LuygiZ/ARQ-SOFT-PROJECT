@@ -1,4 +1,4 @@
-package pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper;
+package pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlmapper;
 
 import org.mapstruct.Mapper;
 import pt.psoft.g1.psoftg1.shared.model.Photo;
@@ -7,15 +7,12 @@ import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 import java.nio.file.Paths;
 
 @Mapper(componentModel = "spring")
-public interface PhotoEntityMapper
-{
-    default Photo toModel(PhotoSqlEntity entity)
-    {
+public interface PhotoEntityMapper {
+    default Photo toModel(PhotoSqlEntity entity) {
         return entity == null ? null : new Photo(Paths.get(entity.getPhotoFile()));
     }
 
-    default PhotoSqlEntity toEntity(Photo model)
-    {
+    default PhotoSqlEntity toEntity(Photo model) {
         return model == null ? null : new PhotoSqlEntity(model.getPhotoFile().toString());
     }
 }

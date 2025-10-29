@@ -15,27 +15,27 @@ import org.springframework.util.StringUtils;
 import pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.AuthorRepositoryImpl;
 import pt.psoft.g1.psoftg1.authormanagement.model.Author;
 import pt.psoft.g1.psoftg1.authormanagement.model.sql.AuthorSqlEntity;
-import pt.psoft.g1.psoftg1.bookmanagement.infrastructure.repositories.impl.sql.sqlMapper.BookEntityMapper;
+import pt.psoft.g1.psoftg1.bookmanagement.infrastructure.repositories.impl.sql.sqlmapper.BookEntityMapper;
 import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.repositories.BookRepository;
 import pt.psoft.g1.psoftg1.bookmanagement.services.BookCountDTO;
 import pt.psoft.g1.psoftg1.bookmanagement.services.SearchBooksQuery;
-import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.GenreRepositoryImpl;
 import pt.psoft.g1.psoftg1.genremanagement.model.Genre;
 import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreSqlEntity;
+import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.GenreRepositoryImpl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Optional;
 
 @Profile("sql")
 @Primary
 @Repository
 @RequiredArgsConstructor
-public class BookRepositoryImpl implements BookRepository
-{
+public class BookRepositoryImpl implements BookRepository {
     private final SpringDataBookRepository bookRepo;
     private final BookEntityMapper bookEntityMapper;
     private final GenreRepositoryImpl genreRepo;
@@ -43,11 +43,9 @@ public class BookRepositoryImpl implements BookRepository
     private final EntityManager em;
 
     @Override
-    public List<Book> findByGenre(@Param("genre") String genre)
-    {
+    public List<Book> findByGenre(@Param("genre") String genre) {
         List<Book> books = new ArrayList<>();
-        for (BookSqlEntity b: bookRepo.findByGenre(genre))
-        {
+        for (BookSqlEntity b : bookRepo.findByGenre(genre)) {
             books.add(bookEntityMapper.toModel(b));
         }
 
@@ -55,11 +53,9 @@ public class BookRepositoryImpl implements BookRepository
     }
 
     @Override
-    public List<Book> findByTitle(@Param("title") String title)
-    {
+    public List<Book> findByTitle(@Param("title") String title) {
         List<Book> books = new ArrayList<>();
-        for (BookSqlEntity b: bookRepo.findByTitle(title))
-        {
+        for (BookSqlEntity b : bookRepo.findByTitle(title)) {
             books.add(bookEntityMapper.toModel(b));
         }
 
@@ -67,11 +63,9 @@ public class BookRepositoryImpl implements BookRepository
     }
 
     @Override
-    public List<Book> findByAuthorName(@Param("authorName") String authorName)
-    {
+    public List<Book> findByAuthorName(@Param("authorName") String authorName) {
         List<Book> books = new ArrayList<>();
-        for (BookSqlEntity b: bookRepo.findByAuthorName(authorName))
-        {
+        for (BookSqlEntity b : bookRepo.findByAuthorName(authorName)) {
             books.add(bookEntityMapper.toModel(b));
         }
 
@@ -79,32 +73,25 @@ public class BookRepositoryImpl implements BookRepository
     }
 
     @Override
-    public Optional<Book> findByIsbn(@Param("isbn") String isbn)
-    {
+    public Optional<Book> findByIsbn(@Param("isbn") String isbn) {
         Optional<BookSqlEntity> entityOpt = bookRepo.findByIsbn(isbn);
-        if(entityOpt.isPresent())
-        {
+        if (entityOpt.isPresent()) {
             return Optional.of(bookEntityMapper.toModel(entityOpt.get()));
-        }
-        else
-        {
+        } else {
             return Optional.empty();
         }
     }
 
     @Override
-    public Page<BookCountDTO> findTop5BooksLent(@Param("oneYearAgo") LocalDate oneYearAgo, Pageable pageable)
-    {
-        //TODO: Corrigir este
+    public Page<BookCountDTO> findTop5BooksLent(@Param("oneYearAgo") LocalDate oneYearAgo, Pageable pageable) {
+        // TODO: Corrigir este
         return bookRepo.findTop5BooksLent(oneYearAgo, pageable);
     }
 
     @Override
-    public List<Book> findBooksByAuthorNumber(Long authorNumber)
-    {
+    public List<Book> findBooksByAuthorNumber(Long authorNumber) {
         List<Book> books = new ArrayList<>();
-        for (BookSqlEntity b: bookRepo.findBooksByAuthorNumber(authorNumber))
-        {
+        for (BookSqlEntity b : bookRepo.findBooksByAuthorNumber(authorNumber)) {
             books.add(bookEntityMapper.toModel(b));
         }
 
@@ -112,8 +99,7 @@ public class BookRepositoryImpl implements BookRepository
     }
 
     @Override
-    public List<Book> searchBooks(pt.psoft.g1.psoftg1.shared.services.Page page, SearchBooksQuery query)
-    {
+    public List<Book> searchBooks(pt.psoft.g1.psoftg1.shared.services.Page page, SearchBooksQuery query) {
         String title = query.getTitle();
         String genre = query.getGenre();
         String authorName = query.getAuthorName();
@@ -143,7 +129,7 @@ public class BookRepositoryImpl implements BookRepository
         q.setFirstResult((page.getNumber() - 1) * page.getLimit());
         q.setMaxResults(page.getLimit());
 
-        List <Book> books = new ArrayList<>();
+        List<Book> books = new ArrayList<>();
 
         for (BookSqlEntity bookEntity : q.getResultList()) {
             books.add(bookEntityMapper.toModel(bookEntity));
@@ -154,8 +140,7 @@ public class BookRepositoryImpl implements BookRepository
 
     @Override
     @Transactional
-    public Book save(Book book)
-    {
+    public Book save(Book book) {
         // Convert the domain model (Book) to a JPA entity (BookEntity)
         BookSqlEntity entity = bookEntityMapper.toEntity(book);
 
@@ -175,13 +160,13 @@ public class BookRepositoryImpl implements BookRepository
         List<AuthorSqlEntity> authors = new ArrayList<>();
 
         // For each author in the Book model
-        for (var author : book.getAuthors())
-        {
+        for (var author : book.getAuthors()) {
             // Retrieve the corresponding Author model from the repository by author number
-            //TODO: temos aqui uma questao, o searchByNameName retorna uma lista de nomes, entao pode nao ser o autor correto (no caso de haver varios autores com o mesmo nome)
-            Author auth  = authorRepo.searchByNameName(author.getName().getName()).get(0);
-            if (auth == null)
-            {
+            // TODO: temos aqui uma questao, o searchByNameName retorna uma lista de nomes,
+            // entao pode nao ser o autor correto (no caso de haver varios autores com o
+            // mesmo nome)
+            Author auth = authorRepo.searchByNameName(author.getName().getName()).get(0);
+            if (auth == null) {
                 throw new RuntimeException("Author not found");
             }
 
@@ -203,8 +188,7 @@ public class BookRepositoryImpl implements BookRepository
     }
 
     @Override
-    public void delete(Book book)
-    {
+    public void delete(Book book) {
         // TODO: implement delete logic
     }
 }

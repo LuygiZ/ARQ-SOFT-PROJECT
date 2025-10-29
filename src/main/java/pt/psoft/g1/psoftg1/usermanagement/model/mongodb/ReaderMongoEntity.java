@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import pt.psoft.g1.psoftg1.shared.model.Name;
+import pt.psoft.g1.psoftg1.shared.model.mongodb.NameMongoEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.Role;
 
-@Document(collection = "readers")
+@Document(collection = "users") // <-- MUDANÇA AQUI (era "readers")
 @Profile("mongodb")
 @Primary
 public class ReaderMongoEntity extends UserMongoEntity {
@@ -25,7 +25,7 @@ public class ReaderMongoEntity extends UserMongoEntity {
             String createdBy,
             String modifiedBy,
             boolean enabled,
-            Name name,
+            NameMongoEntity name,
             Set<Role> authorities) {
         super(username, password, createdAt, modifiedAt, createdBy, modifiedBy, enabled, name, authorities);
     }

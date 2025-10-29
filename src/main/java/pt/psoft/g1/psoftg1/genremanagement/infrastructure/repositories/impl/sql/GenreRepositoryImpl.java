@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.services.GenreBookCountDTO;
-import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.sqlMapper.GenreEntityMapper;
+import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.sqlmapper.GenreEntityMapper;
 import pt.psoft.g1.psoftg1.genremanagement.model.Genre;
 import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreSqlEntity;
 import pt.psoft.g1.psoftg1.genremanagement.repositories.GenreRepository;
@@ -29,18 +29,15 @@ import java.util.*;
 @Primary
 @Repository
 @RequiredArgsConstructor
-public class GenreRepositoryImpl implements GenreRepository
-{
+public class GenreRepositoryImpl implements GenreRepository {
     private final SpringDataGenreRepository genreRepo;
     private final GenreEntityMapper genreEntityMapper;
     private final EntityManager entityManager;
 
     @Override
-    public Iterable<Genre> findAll()
-    {
+    public Iterable<Genre> findAll() {
         List<Genre> genres = new ArrayList<>();
-        for (GenreSqlEntity g: genreRepo.findAll())
-        {
+        for (GenreSqlEntity g : genreRepo.findAll()) {
             genres.add(genreEntityMapper.toModel(g));
         }
 
@@ -48,42 +45,34 @@ public class GenreRepositoryImpl implements GenreRepository
     }
 
     @Override
-    public Optional<Genre> findByString(String genreName)
-    {
+    public Optional<Genre> findByString(String genreName) {
         Optional<GenreSqlEntity> entityOpt = genreRepo.findByString(genreName);
-        if (entityOpt.isPresent())
-        {
+        if (entityOpt.isPresent()) {
             return Optional.of(genreEntityMapper.toModel(entityOpt.get()));
-        }
-        else
-        {
+        } else {
             return Optional.empty();
         }
     }
 
     @Override
     @Transactional
-    public Genre save(Genre genre)
-    {
+    public Genre save(Genre genre) {
         GenreSqlEntity entity = genreEntityMapper.toEntity(genre);
         return genreEntityMapper.toModel(genreRepo.save(entity));
     }
 
     @Override
-    public Page<GenreBookCountDTO> findTop5GenreByBookCount(Pageable pageable)
-    {
+    public Page<GenreBookCountDTO> findTop5GenreByBookCount(Pageable pageable) {
         return genreRepo.findTop5GenreByBookCount(pageable);
     }
 
     @Override
-    public void delete(Genre genre)
-    {
+    public void delete(Genre genre) {
         genreRepo.delete(genreEntityMapper.toEntity(genre));
     }
 
     @Override
-    public List<GenreLendingsPerMonthDTO> getLendingsPerMonthLastYearByGenre()
-    {
+    public List<GenreLendingsPerMonthDTO> getLendingsPerMonthLastYearByGenre() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
         Root<LendingSqlEntity> lendingRoot = cq.from(LendingSqlEntity.class);
@@ -131,8 +120,8 @@ public class GenreRepositoryImpl implements GenreRepository
     }
 
     @Override
-    public List<GenreLendingsDTO> getAverageLendingsInMonth(LocalDate month, pt.psoft.g1.psoftg1.shared.services.Page page)
-    {
+    public List<GenreLendingsDTO> getAverageLendingsInMonth(LocalDate month,
+            pt.psoft.g1.psoftg1.shared.services.Page page) {
         int days = month.lengthOfMonth();
         LocalDate firstOfMonth = LocalDate.of(month.getYear(), month.getMonth(), 1);
         LocalDate lastOfMonth = LocalDate.of(month.getYear(), month.getMonth(), days);
@@ -165,8 +154,7 @@ public class GenreRepositoryImpl implements GenreRepository
     }
 
     @Override
-    public List<GenreLendingsPerMonthDTO> getLendingsAverageDurationPerMonth(LocalDate startDate, LocalDate endDate)
-    {
+    public List<GenreLendingsPerMonthDTO> getLendingsAverageDurationPerMonth(LocalDate startDate, LocalDate endDate) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 
@@ -177,8 +165,8 @@ public class GenreRepositoryImpl implements GenreRepository
         Expression<Integer> yearExpr = cb.function("YEAR", Integer.class, lendingRoot.get("startDate"));
         Expression<Integer> monthExpr = cb.function("MONTH", Integer.class, lendingRoot.get("startDate"));
         Expression<Long> lendingDurationInDays = cb.diff(lendingRoot.get("returnedDate"), lendingRoot.get("startDate"));
-        double nanoSecondsInADay = 86400.0*1E9;
-        Expression<Number> durationInDays = cb.quot(cb.toDouble(lendingDurationInDays),nanoSecondsInADay);
+        double nanoSecondsInADay = 86400.0 * 1E9;
+        Expression<Number> durationInDays = cb.quot(cb.toDouble(lendingDurationInDays), nanoSecondsInADay);
         Expression<Double> averageDuration = cb.avg(cb.toDouble(durationInDays));
 
         cq.multiselect(genreJoin.get("genre"), yearExpr, monthExpr, averageDuration);
@@ -212,8 +200,8 @@ public class GenreRepositoryImpl implements GenreRepository
     }
 
     @NotNull
-    private List<GenreLendingsPerMonthDTO> getGenreLendingsPerMonthDtos(Map<Integer, Map<Integer, List<GenreLendingsDTO>>> groupedResults)
-    {
+    private List<GenreLendingsPerMonthDTO> getGenreLendingsPerMonthDtos(
+            Map<Integer, Map<Integer, List<GenreLendingsDTO>>> groupedResults) {
         List<GenreLendingsPerMonthDTO> lendingsPerMonth = new ArrayList<>();
         for (Map.Entry<Integer, Map<Integer, List<GenreLendingsDTO>>> yearEntry : groupedResults.entrySet()) {
             int yearValue = yearEntry.getKey();

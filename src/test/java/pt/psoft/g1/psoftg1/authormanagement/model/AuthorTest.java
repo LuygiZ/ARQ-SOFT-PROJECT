@@ -8,7 +8,6 @@ import pt.psoft.g1.psoftg1.authormanagement.services.UpdateAuthorRequest;
 import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
 import pt.psoft.g1.psoftg1.shared.model.Photo;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class AuthorTest {
@@ -17,23 +16,26 @@ class AuthorTest {
 
     private final UpdateAuthorRequest request = new UpdateAuthorRequest(validName, validBio, null, null);
 
-    private static class EntityWithPhotoImpl extends EntityWithPhoto { }
+    private static class EntityWithPhotoImpl extends EntityWithPhoto {
+    }
+
     @BeforeEach
     void setUp() {
     }
+
     @Test
-    void ensureNameNotNull(){
-        assertThrows(IllegalArgumentException.class, () -> new Author(null,validBio, null));
+    void ensureNameNotNull() {
+        assertThrows(IllegalArgumentException.class, () -> new Author(null, validBio, null));
     }
 
     @Test
-    void ensureBioNotNull(){
-        assertThrows(IllegalArgumentException.class, () -> new Author(validName,null, null));
+    void ensureBioNotNull() {
+        assertThrows(IllegalArgumentException.class, () -> new Author(validName, null, null));
     }
 
     @Test
     void whenVersionIsStaleItIsNotPossibleToPatch() {
-        final var subject = new Author(validName,validBio, null);
+        final var subject = new Author(validName, validBio, null);
 
         assertThrows(StaleObjectStateException.class, () -> subject.applyPatch(999, request));
     }
@@ -83,4 +85,3 @@ class AuthorTest {
         assertEquals("photoTest.jpg", photo.getPhotoFile());
     }
 }
-

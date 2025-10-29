@@ -36,11 +36,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import pt.psoft.g1.psoftg1.shared.model.Name;
+import pt.psoft.g1.psoftg1.shared.model.mongodb.NameMongoEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.Role;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,7 +53,11 @@ import lombok.Setter;
 public class UserMongoEntity {
 
 	@Id
-	private String id;
+	private String id; // ID interno (String) do MongoDB
+
+	@Indexed(unique = true)
+	@Field("user_id")
+	private Long userId;
 
 	@Version
 	private Long version;
@@ -95,7 +99,7 @@ public class UserMongoEntity {
 	@Getter
 	// @Setter
 	@Field("name")
-	private Name name;
+	private NameMongoEntity name;
 
 	@Field("authorities")
 	private final Set<Role> authorities = new HashSet<>();
@@ -112,7 +116,7 @@ public class UserMongoEntity {
 			String createdBy,
 			String modifiedBy,
 			boolean enabled,
-			Name name,
+			NameMongoEntity name,
 			Set<Role> authorities) {
 
 		this.username = username;

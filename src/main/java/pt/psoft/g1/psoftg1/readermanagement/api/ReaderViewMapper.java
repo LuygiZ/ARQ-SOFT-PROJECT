@@ -35,36 +35,40 @@ public abstract class ReaderViewMapper extends MapperInterface {
     @Mapping(target = "readerNumber", source = "readerNumber")
     @Mapping(target = "photo", expression = "java(generatePhotoUrl(readerDetails))")
     @Mapping(target = "interestList", expression = "java(mapInterestList(readerDetails.getInterestList()))")
+    @Mapping(target = "quote", expression = "java(generateQuote(readerDetails))")
     public abstract ReaderQuoteView toReaderQuoteView(ReaderDetails readerDetails);
 
     @Mapping(target = ".", qualifiedByName = "toReaderView")
     public abstract List<ReaderView> toReaderView(Iterable<ReaderDetails> readerList);
 
-   @Mapping(target = "readerView", source = "readerDetails")
+    @Mapping(target = "readerView", source = "readerDetails")
     public abstract ReaderCountView toReaderCountView(ReaderBookCountDTO readerBookCountDTO);
 
     public abstract List<ReaderCountView> toReaderCountViewList(List<ReaderBookCountDTO> readerBookCountDTOList);
-
 
     protected String generatePhotoUrl(ReaderDetails readerDetails) {
         String readerNumber = readerDetails.getReaderNumber();
         String[] readerNumberSplit = readerNumber.split("/");
         int year = Integer.parseInt(readerNumberSplit[0]);
         int seq = Integer.parseInt(readerNumberSplit[1]);
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/readers/{year}/{seq}/photo").buildAndExpand(year,seq).toUri().toString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/readers/{year}/{seq}/photo")
+                .buildAndExpand(year, seq).toUri().toString();
     }
 
     protected List<String> mapInterestList(List<Genre> interestList) {
         List<String> stringInterestList = new ArrayList<>();
-
-        if(interestList == null || interestList.isEmpty()) {
+        if (interestList == null || interestList.isEmpty()) {
             return stringInterestList;
         }
-
-        for(Genre genre : interestList) {
+        for (Genre genre : interestList) {
             stringInterestList.add(genre.getGenre());
         }
-
         return stringInterestList;
+    }
+
+    protected String generateQuote(ReaderDetails readerDetails) {
+        // You can implement any logic here to generate a quote for the reader
+        // This is just a placeholder
+        return "Reading is to the mind what exercise is to the body.";
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import pt.psoft.g1.psoftg1.exceptions.NotFoundException;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.UserSqlEntity;
 
@@ -42,7 +41,8 @@ public interface SpringDataUserRepository extends CrudRepository<UserSqlEntity, 
     default UserSqlEntity getById(final Long id) {
         final Optional<UserSqlEntity> maybeUser = findById(id);
         // throws 404 Not Found if the user does not exist or is not enabled
-        return maybeUser.filter(UserSqlEntity::isEnabled).orElseThrow(() -> new NotFoundException(UserSqlEntity.class, id));
+        return maybeUser.filter(UserSqlEntity::isEnabled)
+                .orElseThrow(() -> new NotFoundException(UserSqlEntity.class, id));
     }
 
     @Cacheable

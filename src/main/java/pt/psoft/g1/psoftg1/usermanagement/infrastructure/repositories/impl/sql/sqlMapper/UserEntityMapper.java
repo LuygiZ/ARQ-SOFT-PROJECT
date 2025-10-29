@@ -1,4 +1,4 @@
-package pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.sqlMapper;
+package pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.sqlmapper;
 
 import org.mapstruct.Mapper;
 import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
@@ -10,20 +10,20 @@ import pt.psoft.g1.psoftg1.usermanagement.model.sql.ReaderSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.UserSqlEntity;
 
 @Mapper(componentModel = "spring")
-public interface UserEntityMapper
-{
+public interface UserEntityMapper {
     User toModel(UserSqlEntity entity);
+
     UserSqlEntity toEntity(User model);
 
     Librarian toModel(LibrarianSqlEntity entity);
+
     LibrarianSqlEntity toEntity(Librarian user);
 
     Reader toModel(ReaderSqlEntity entity);
+
     ReaderSqlEntity toEntity(Reader user);
 
-    default String map(NameSqlEntity value)
-    {
+    default String map(NameSqlEntity value) {
         return value == null ? null : value.toString();
     }
 }
-
