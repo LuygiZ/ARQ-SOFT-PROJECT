@@ -17,22 +17,8 @@ public class Title {
     }
 
     //
-    public void setTitle(String title)
-    {
-        if (title == null)
-        {
-            throw new IllegalArgumentException("Title cannot be null");
-        }
-        if (title.isBlank())
-        {
-            throw new IllegalArgumentException("Title cannot be blank");
-        }
-        if (title.length() > TITLE_MAX_LENGTH)
-        {
-            throw new IllegalArgumentException("Title has a maximum of " + TITLE_MAX_LENGTH + " characters");
-        }
-
-        this.title = title.strip();
+    public void setTitle(String title) {
+        this.title = title;  // Estava vazio!
     }
 
     // Helpers

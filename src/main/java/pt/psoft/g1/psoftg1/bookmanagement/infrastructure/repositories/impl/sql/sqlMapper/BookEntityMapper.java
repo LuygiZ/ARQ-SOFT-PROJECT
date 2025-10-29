@@ -4,67 +4,59 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.sqlMapper.AuthorEntityMapper;
 import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
+import pt.psoft.g1.psoftg1.bookmanagement.model.Description;
+import pt.psoft.g1.psoftg1.bookmanagement.model.Isbn;
+import pt.psoft.g1.psoftg1.bookmanagement.model.Title;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.DescriptionSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.IsbnSqlEntity;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.TitleSqlEntity;
-import pt.psoft.g1.psoftg1.genremanagement.model.sql.GenreSqlEntity;
 import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.sqlMapper.GenreEntityMapper;
 import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper.PhotoEntityMapper;
 
 @Mapper(componentModel = "spring", uses = {GenreEntityMapper.class, AuthorEntityMapper.class, PhotoEntityMapper.class})
 public interface BookEntityMapper
 {
+    @Mapping(target="title", source="title")
+    @Mapping(target="description", source="description")
+    @Mapping(target="isbn", source="isbn")
+    @Mapping(target="genre", source="genre")
     @Mapping(target="photoURI", source="photo")
     Book toModel(BookSqlEntity entity);
+
+    @Mapping(target="title", source="titleObj")
+    @Mapping(target="description", source="descriptionObj")
+    @Mapping(target="isbn", source="isbnObj")
+    @Mapping(target="genre", source="genreObj")
     BookSqlEntity toEntity(Book model);
 
-    // Mapping methods for Title (Entity -> String)
+    // Title mappings
     default String map(TitleSqlEntity value) {
         return value == null ? null : value.getTitle();
     }
 
-    // Mapping methods for Title (String -> Entity)
-    default TitleSqlEntity mapToTitle(String title) {
-        if (title == null) return null;
-        TitleSqlEntity entity = new TitleSqlEntity();
-        entity.setTitle(title);
-        return entity;
+    default TitleSqlEntity map(Title value) {
+        return value == null ? null : new TitleSqlEntity(value.getTitle());
     }
 
-    // Mapping methods for Description (Entity -> String)
+    // Description mappings
     default String map(DescriptionSqlEntity entity) {
         return entity == null ? null : entity.getDescription();
     }
 
-    // Mapping methods for Description (String -> Entity)
-    default DescriptionSqlEntity mapToDescription(String description) {
-        if (description == null) return null;
+    default DescriptionSqlEntity map(Description value) {
+        if (value == null) return null;
         DescriptionSqlEntity entity = new DescriptionSqlEntity();
-        entity.setDescription(description);
+        entity.setDescription(value.getDescription());
         return entity;
     }
 
-    // Mapping methods for Genre (Entity -> String)
-    default String map(GenreSqlEntity entity) {
-        return entity == null ? null : entity.getGenre();
-    }
-
-    // Mapping methods for Genre (String -> Entity)
-    default GenreSqlEntity mapToGenre(String genre) {
-        if (genre == null) return null;
-        GenreSqlEntity entity = new GenreSqlEntity();
-        entity.setGenre(genre);
-        return entity;
-    }
-
-    // Mapping methods for ISBN (Entity -> String)
+    // ISBN mappings
     default String map(IsbnSqlEntity entity) {
         return entity == null ? null : entity.toString();
     }
 
-    // Mapping methods for ISBN (String -> Entity)
-    default IsbnSqlEntity mapToIsbn(String isbn) {
-        return isbn == null ? null : new IsbnSqlEntity(isbn);
+    default IsbnSqlEntity map(Isbn value) {
+        return value == null ? null : new IsbnSqlEntity(value.toString());
     }
 }

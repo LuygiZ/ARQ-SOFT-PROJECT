@@ -100,18 +100,12 @@ public class ReaderDetailsRepositoryImpl implements ReaderRepository
     @Override
     public ReaderDetails save(ReaderDetails readerDetails)
     {
-        // Convert the domain model (readerDetails) to a JPA entity (ReaderDetailsEntity)
         ReaderDetailsSqlEntity readerDetailsEntity = readerEntityMapper.toEntity(readerDetails);
 
-        // Retrieve the existing User model from the repository
-        // Throws an exception if the user is not found
-        User userModel = userRepo.findByUsername(readerDetails.getReader().getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        //TODO: No futuro aqui vai ter de deixar de ser ID
-        // Get the managed JPA reference for the UserEntity using its database ID
-        // This ensures we use the existing UserEntity instead of creating a new one
-        ReaderSqlEntity userEntity = entityManager.getReference(ReaderSqlEntity.class, userModel.getId());
+        // Buscar a entidade SQL diretamente
+        ReaderSqlEntity userEntity = userRepo.findReaderEntityByUsername(
+                readerDetails.getReader().getUsername()
+        ).orElseThrow(() -> new RuntimeException("Reader not found"));
 
         readerDetailsEntity.setReader(userEntity);
         return readerEntityMapper.toModel(readerRepo.save(readerDetailsEntity));

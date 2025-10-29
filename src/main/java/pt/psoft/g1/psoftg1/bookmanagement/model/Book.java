@@ -79,8 +79,24 @@ public class Book extends EntityWithPhoto {
         this.authors = authors;
     }
 
-    // Getters
+    // Getters - Value Objects
+    public Isbn getIsbnObj() {
+        return this.isbn;
+    }
 
+    public Title getTitleObj() {
+        return this.title;
+    }
+
+    public Description getDescriptionObj() {
+        return this.description;
+    }
+
+    public Genre getGenreObj() {
+        return this.genre;
+    }
+
+    // Getters - String (para compatibilidade)
     public String getIsbn() {
         return this.isbn.toString();
     }
@@ -150,5 +166,4 @@ public class Book extends EntityWithPhoto {
         if (photoURI != null)
             setPhotoInternal(photoURI);
     }
-
 }

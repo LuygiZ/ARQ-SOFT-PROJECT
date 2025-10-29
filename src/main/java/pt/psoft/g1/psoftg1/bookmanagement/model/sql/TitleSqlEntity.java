@@ -2,7 +2,6 @@ package pt.psoft.g1.psoftg1.bookmanagement.model.sql;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
@@ -27,10 +26,11 @@ public class TitleSqlEntity implements Serializable
 
     public TitleSqlEntity() { }
 
-    public TitleSqlEntity(String title) { this.title = title; }
+    public TitleSqlEntity(String title) {
+        this.title = title;
+    }
 
     public void setTitle(String title) {
-
+        this.title = title;
     }
 }
-
