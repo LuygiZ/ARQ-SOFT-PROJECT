@@ -1,8 +1,7 @@
-package pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.sqlMapper;
+package pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.sqlmapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper.NameEntityMapper;
 import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.Librarian;
 import pt.psoft.g1.psoftg1.usermanagement.model.Reader;

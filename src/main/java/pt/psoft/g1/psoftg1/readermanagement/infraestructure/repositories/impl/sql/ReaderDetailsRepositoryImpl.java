@@ -10,14 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import pt.psoft.g1.psoftg1.readermanagement.infraestructure.repositories.impl.sql.sqlMapper.ReaderDetailsEntityMapper;
+import pt.psoft.g1.psoftg1.readermanagement.infraestructure.repositories.impl.sql.sqlmapper.ReaderDetailsEntityMapper;
 import pt.psoft.g1.psoftg1.readermanagement.model.ReaderDetails;
 import pt.psoft.g1.psoftg1.readermanagement.model.sql.ReaderDetailsSqlEntity;
 import pt.psoft.g1.psoftg1.readermanagement.repositories.ReaderRepository;
 import pt.psoft.g1.psoftg1.readermanagement.services.ReaderBookCountDTO;
 import pt.psoft.g1.psoftg1.readermanagement.services.SearchReadersQuery;
 import pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.UserRepositoryImpl;
-import pt.psoft.g1.psoftg1.usermanagement.model.User;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.ReaderSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.UserSqlEntity;
 
