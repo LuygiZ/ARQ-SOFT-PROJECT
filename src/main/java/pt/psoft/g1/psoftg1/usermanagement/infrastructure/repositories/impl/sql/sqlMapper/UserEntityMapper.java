@@ -1,13 +1,18 @@
 package pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.sqlMapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlMapper.NameEntityMapper;
 import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.Librarian;
 import pt.psoft.g1.psoftg1.usermanagement.model.Reader;
+import pt.psoft.g1.psoftg1.usermanagement.model.Role;
 import pt.psoft.g1.psoftg1.usermanagement.model.User;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.LibrarianSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.ReaderSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.sql.UserSqlEntity;
+
+import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface UserEntityMapper
@@ -16,14 +21,31 @@ public interface UserEntityMapper
     UserSqlEntity toEntity(User model);
 
     Librarian toModel(LibrarianSqlEntity entity);
+    @Mapping(target = "role", source="authorities")
     LibrarianSqlEntity toEntity(Librarian user);
 
     Reader toModel(ReaderSqlEntity entity);
+    @Mapping(target = "role", source="authorities")
     ReaderSqlEntity toEntity(Reader user);
+
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "modifiedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "role", source="authorities")
+    ReaderSqlEntity toReaderEntity(UserSqlEntity userEntity);
 
     default String map(NameSqlEntity value)
     {
         return value == null ? null : value.toString();
     }
-}
 
+    // TODO: Confirmar com o professor "Apesar de ter um Set<Role> cada um User so pode ter uma ROLE, certo?"
+    default Role map(Set<Role> value)
+    {
+        if (value == null || value.isEmpty())
+        {
+            return null;
+        }
+        return value.iterator().next(); // Take the first role
+    }
+}
