@@ -157,4 +157,18 @@ public class UserRepositoryImpl implements UserRepository {
     public void delete(User user) {
 
     }
+
+    // Novo method para retornar a entidade SQL diretamente
+    public Optional<ReaderSqlEntity> findReaderEntityByUsername(String username)
+    {
+        Optional<UserSqlEntity> entityOpt = userRepo.findByUsername(username);
+        if (entityOpt.isPresent() && entityOpt.get() instanceof ReaderSqlEntity)
+        {
+            return Optional.of((ReaderSqlEntity) entityOpt.get());
+        }
+        else
+        {
+            return Optional.empty();
+        }
+    }
 }

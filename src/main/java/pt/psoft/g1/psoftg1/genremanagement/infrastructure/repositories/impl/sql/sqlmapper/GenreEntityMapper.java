@@ -9,4 +9,12 @@ public interface GenreEntityMapper {
     Genre toModel(GenreSqlEntity entity);
 
     GenreSqlEntity toEntity(Genre model);
+
+    default String map(GenreSqlEntity entity) {
+        return entity == null ? null : entity.getGenre();
+    }
+
+    default Genre map(String genre) {
+        return genre == null ? null : new Genre(genre);
+    }
 }

@@ -3,7 +3,11 @@ package pt.psoft.g1.psoftg1.authormanagement.services;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.springframework.web.multipart.MultipartFile;
+import pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.sqlmapper.BioEntityMapper;
+import pt.psoft.g1.psoftg1.authormanagement.model.Author;
+import pt.psoft.g1.psoftg1.shared.api.MapperInterface;
+import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlmapper.NameEntityMapper;
+import pt.psoft.g1.psoftg1.shared.model.Name;
 
 import pt.psoft.g1.psoftg1.authormanagement.model.Author;
 import pt.psoft.g1.psoftg1.authormanagement.model.Bio;

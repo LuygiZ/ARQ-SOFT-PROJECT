@@ -1,38 +1,38 @@
 // package
 // pt.psoft.g1.psoftg1.lendingmanagement.infrastructure.repositories.impl.sql;
 
-// import jakarta.persistence.EntityManager;
-// import jakarta.persistence.TypedQuery;
-// import jakarta.persistence.criteria.*;
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.context.annotation.Primary;
-// import org.springframework.context.annotation.Profile;
-// import org.springframework.stereotype.Repository;
-// import org.springframework.util.StringUtils;
-// import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
-// // import
-// pt.psoft.g1.psoftg1.lendingmanagement.infrastructure.repositories.impl.sql.sqlmapper.LendingEntityMapper;
-// import pt.psoft.g1.psoftg1.lendingmanagement.model.Lending;
-// import pt.psoft.g1.psoftg1.lendingmanagement.model.sql.LendingSqlEntity;
-// import pt.psoft.g1.psoftg1.lendingmanagement.repositories.LendingRepository;
-// import pt.psoft.g1.psoftg1.readermanagement.model.ReaderDetails;
-// import pt.psoft.g1.psoftg1.shared.services.Page;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
+import pt.psoft.g1.psoftg1.lendingmanagement.infrastructure.repositories.impl.sql.sqlmapper.LendingEntityMapper;
+import pt.psoft.g1.psoftg1.lendingmanagement.model.Lending;
+import pt.psoft.g1.psoftg1.lendingmanagement.model.sql.LendingSqlEntity;
+import pt.psoft.g1.psoftg1.lendingmanagement.repositories.LendingRepository;
+import pt.psoft.g1.psoftg1.readermanagement.model.ReaderDetails;
+import pt.psoft.g1.psoftg1.shared.services.Page;
 
 // import java.time.LocalDate;
 // import java.util.ArrayList;
 // import java.util.List;
 // import java.util.Optional;
 
-// @Profile("jpa")
-// @Primary
-// @Repository
-// @RequiredArgsConstructor
-// public class LendingRepositoryImpl implements LendingRepository {
-// private final SpringDataLendingRepository lendingRepo;
-// // private final LendingEntityMapper lendingEntityMapper;
-// private final EntityManager em;
-// // private final BookRepositoryRelationalImpl bookRepo;
-// // private final ReaderDetailsRepositoryRelationalImpl readerDetailsRepo;
+@Profile("sql")
+@Primary
+@Repository
+@RequiredArgsConstructor
+public class LendingRepositoryImpl implements LendingRepository
+{
+    private final SpringDataLendingRepository lendingRepo;
+    private final LendingEntityMapper lendingEntityMapper;
+    private final EntityManager em;
+    //private final BookRepositoryRelationalImpl bookRepo;
+    //private final ReaderDetailsRepositoryRelationalImpl readerDetailsRepo;
 
 // @Override
 // public Optional<Lending> findByLendingNumber(String lendingNumber) {

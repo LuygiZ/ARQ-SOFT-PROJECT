@@ -12,28 +12,28 @@ public interface SpringDataLendingRepository extends CrudRepository<LendingSqlEn
 {
 
     @Query("SELECT l " +
-            "FROM LendingEntity l " +
+            "FROM LendingSqlEntity l " +
             "WHERE l.lendingNumber.lendingNumber = :lendingNumber")
     Optional<LendingSqlEntity> findByLendingNumber(String lendingNumber);
 
     //http://www.h2database.com/html/commands.html
 
     @Query("SELECT l " +
-            "FROM LendingEntity l " +
-            "JOIN BookEntity b ON l.book.pk = b.pk " +
-            "JOIN ReaderDetailsEntity r ON l.readerDetails.pk = r.pk " +
+            "FROM LendingSqlEntity l " +
+            "JOIN BookSqlEntity b ON l.book.pk = b.pk " +
+            "JOIN ReaderDetailsSqlEntity r ON l.readerDetails.pk = r.pk " +
             "WHERE b.isbn.isbn = :isbn " +
             "AND r.readerNumber.readerNumber = :readerNumber ")
     List<LendingSqlEntity> listByReaderNumberAndIsbn(String readerNumber, String isbn);
 
     @Query("SELECT COUNT (l) " +
-            "FROM LendingEntity l " +
+            "FROM LendingSqlEntity l " +
             "WHERE YEAR(l.startDate) = YEAR(CURRENT_DATE)")
     int getCountFromCurrentYear();
 
     @Query("SELECT l " +
-            "FROM LendingEntity l " +
-            "JOIN ReaderDetailsEntity r ON l.readerDetails.pk = r.pk " +
+            "FROM LendingSqlEntity l " +
+            "JOIN ReaderDetailsSqlEntity r ON l.readerDetails.pk = r.pk " +
             "WHERE r.readerNumber.readerNumber = :readerNumber " +
             "AND l.returnedDate IS NULL")
     List<LendingSqlEntity> listOutstandingByReaderNumber(@Param("readerNumber") String readerNumber);

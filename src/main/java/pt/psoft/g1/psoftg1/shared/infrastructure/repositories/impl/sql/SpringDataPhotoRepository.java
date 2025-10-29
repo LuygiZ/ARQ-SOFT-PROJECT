@@ -5,19 +5,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 import pt.psoft.g1.psoftg1.shared.model.Photo;
+import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 import pt.psoft.g1.psoftg1.shared.repositories.PhotoRepository;
 
-public interface SpringDataPhotoRepository extends PhotoRepository, CrudRepository<Photo, Long> {
-    /*@Override
-    @Query("SELECT p " +
-            "FROM Photo p " +
-            "WHERE p.pk = :photo_id")
-    Optional<Photo> findById(@Param("photo_id") long id);*/
-    @Override
+public interface SpringDataPhotoRepository extends CrudRepository<PhotoSqlEntity, Long> {
+    // Remove: extends PhotoRepository
+
     @Modifying
     @Transactional
-    @Query("DELETE " +
-            "FROM Photo p " +
-            "WHERE p.photoFile = :photoFile")
+    @Query("DELETE FROM PhotoSqlEntity p WHERE p.photoFile = :photoFile")
     void deleteByPhotoFile(String photoFile);
 }
