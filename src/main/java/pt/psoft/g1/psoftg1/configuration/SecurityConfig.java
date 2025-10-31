@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,9 +43,9 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 import pt.psoft.g1.psoftg1.usermanagement.model.Role;
-import pt.psoft.g1.psoftg1.usermanagement.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import pt.psoft.g1.psoftg1.usermanagement.repositories.UserRepository;
 
 /**
  * Check https://www.baeldung.com/security-spring and
@@ -79,10 +80,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(final UserDetailsService userDetailsService,
                                                        final PasswordEncoder passwordEncoder) {
+        System.out.println("Creating AuthenticationManager with encoder: " + passwordEncoder.getClass().getName());
         final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
-
         return new ProviderManager(authenticationProvider);
     }
 
@@ -97,6 +98,9 @@ public class SecurityConfig {
         // Enable CORS and disable CSRF
         http = http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.disable());
 
+        // Permitir frames para H2 Console (apenas desenvolvimento)
+        http = http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));  // ADICIONA ESTA LINHA
+
         // Set session management to stateless
         http = http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -110,8 +114,10 @@ public class SecurityConfig {
                 // Swagger endpoints must be publicly accessible
                 .requestMatchers("/").permitAll().requestMatchers(format("%s/**", restApiDocPath)).permitAll()
                 .requestMatchers(format("%s/**", swaggerPath)).permitAll()
+                // H2 Console (apenas para desenvolvimento)
+                .requestMatchers("/h2-console/**").permitAll()  // ADICIONA ESTA LINHA
                 // Our public endpoints
-                .requestMatchers("/api/public/**").permitAll() // public assets & end-points
+                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/readers").permitAll() //unregistered should be able to register
                 // Our private endpoints
                 //authors

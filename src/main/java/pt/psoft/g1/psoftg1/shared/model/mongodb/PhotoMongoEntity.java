@@ -1,9 +1,6 @@
 package pt.psoft.g1.psoftg1.shared.model.mongodb;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +8,7 @@ import lombok.Setter;
 import java.nio.file.Path;
 
 @Entity
+@Table(name="Photo")
 public class PhotoMongoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

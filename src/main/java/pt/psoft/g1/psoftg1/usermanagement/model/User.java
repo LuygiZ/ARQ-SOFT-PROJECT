@@ -1,56 +1,15 @@
-/*
- * Copyright (c) 2022-2024 the original author or authors.
- *
- * MIT License
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
 package pt.psoft.g1.psoftg1.usermanagement.model;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pt.psoft.g1.psoftg1.shared.model.Name;
 
-import lombok.Getter;
-import lombok.Setter;
-
-/**
- * Based on https://github.com/Yoh0xFF/java-spring-security-example
- *
- */
-
 public class User implements UserDetails
 {
     private Long id;
-
     private Long version;
     private boolean enabled = true;
     private String username;
@@ -63,7 +22,16 @@ public class User implements UserDetails
     public User(final String username, final String password)
     {
         setUsername(username);
-        setPassword(password);
+        encodePassword(password);
+    }
+
+    // Factory method para MapStruct usar ao carregar da BD
+    public static User forMapper(String username, String password)
+    {
+        User user = new User();
+        user.username = username;
+        user.password = password; // NÃO encripta - já vem encriptada da BD
+        return user;
     }
 
     public static User newUser(final String username, final String password, final String name)
@@ -81,17 +49,21 @@ public class User implements UserDetails
         return u;
     }
 
-    public void setPassword(final String password)
+    public void encodePassword(final String rawPassword)
     {
         final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.password = passwordEncoder.encode(password);
+        this.password = passwordEncoder.encode(rawPassword);
+    }
+
+    public void setPassword(final String password)
+    {
+        this.password = password;
     }
 
     public void setUsername(final String username)
     {
         this.username = username;
     }
-
 
     public void addAuthority(final Role r)
     {
@@ -116,19 +88,11 @@ public class User implements UserDetails
     @Override
     public Set<Role> getAuthorities() { return authorities; }
     @Override
-    public boolean isAccountNonExpired() {
-        return isEnabled();
-    }
-
+    public boolean isAccountNonExpired() { return isEnabled(); }
     @Override
-    public boolean isAccountNonLocked() {
-        return isEnabled();
-    }
-
+    public boolean isAccountNonLocked() { return isEnabled(); }
     @Override
-    public boolean isCredentialsNonExpired() {
-        return isEnabled();
-    }
+    public boolean isCredentialsNonExpired() { return isEnabled(); }
     public Long getId() { return id; }
     public Long getVersion() { return version; }
 }

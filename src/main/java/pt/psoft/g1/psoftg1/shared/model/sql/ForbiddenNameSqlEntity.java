@@ -9,10 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
+@Table(name="ForbiddenName")
+@NoArgsConstructor
 @Profile("sql")
 @Primary
-@Entity
-@NoArgsConstructor
 public class ForbiddenNameSqlEntity {
 
     @Id

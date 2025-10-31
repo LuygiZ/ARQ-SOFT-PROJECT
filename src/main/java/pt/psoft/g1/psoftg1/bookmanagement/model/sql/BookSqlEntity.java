@@ -12,7 +12,7 @@ import pt.psoft.g1.psoftg1.shared.model.EntityWithPhoto;
 import java.util.ArrayList;
 import java.util.List;
 
-@Profile("SQL") //Specifies which environment (or Spring profile) a bean should be loaded in.
+@Profile("sql") //Specifies which environment (or Spring profile) a bean should be loaded in.
 @Primary //Marks a bean as the default when multiple candidates of the same type exist.
 @Entity
 @Table(name = "Book", uniqueConstraints = {
@@ -42,6 +42,7 @@ public class BookSqlEntity extends EntityWithPhoto {
 
     @Getter
     @ManyToMany
+    @JoinTable(joinColumns = @JoinColumn(name = "BOOK_PK"))
     private List<AuthorSqlEntity> authors = new ArrayList<>();
 
     @Embedded

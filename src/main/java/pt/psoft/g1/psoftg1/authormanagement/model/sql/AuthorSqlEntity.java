@@ -11,6 +11,7 @@ import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 @Profile("sql")
 @Primary
 @Entity
+@Table(name = "AUTHOR")  // ADICIONA ESTA LINHA
 public class AuthorSqlEntity extends EntityWithPhotoSqlEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

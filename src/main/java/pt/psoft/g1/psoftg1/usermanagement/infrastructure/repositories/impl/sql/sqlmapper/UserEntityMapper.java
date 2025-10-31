@@ -2,6 +2,7 @@ package pt.psoft.g1.psoftg1.usermanagement.infrastructure.repositories.impl.sql.
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ObjectFactory;
 import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
 import pt.psoft.g1.psoftg1.usermanagement.model.Librarian;
 import pt.psoft.g1.psoftg1.usermanagement.model.Reader;
@@ -33,18 +34,33 @@ public interface UserEntityMapper
     @Mapping(target = "role", source="authorities")
     ReaderSqlEntity toReaderEntity(UserSqlEntity userEntity);
 
+    // Factory methods para criar instâncias sem encriptar
+    @ObjectFactory
+    default User createUser(UserSqlEntity entity) {
+        return User.forMapper(entity.getUsername(), entity.getPassword());
+    }
+
+    @ObjectFactory
+    default Reader createReader(ReaderSqlEntity entity) {
+        return Reader.forMapper(entity.getUsername(), entity.getPassword());
+    }
+
+    @ObjectFactory
+    default Librarian createLibrarian(LibrarianSqlEntity entity) {
+        return Librarian.forMapper(entity.getUsername(), entity.getPassword());
+    }
+
     default String map(NameSqlEntity value)
     {
         return value == null ? null : value.toString();
     }
 
-    // TODO: Confirmar com o professor "Apesar de ter um Set<Role> cada um User so pode ter uma ROLE, certo?"
     default Role map(Set<Role> value)
     {
         if (value == null || value.isEmpty())
         {
             return null;
         }
-        return value.iterator().next(); // Take the first role
+        return value.iterator().next();
     }
 }

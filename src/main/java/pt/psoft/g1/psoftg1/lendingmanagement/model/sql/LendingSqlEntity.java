@@ -14,8 +14,9 @@ import java.time.LocalDate;
 @Profile("sql")
 @Primary
 @Entity
-@Table(uniqueConstraints = {
+@Table(name="Lending", uniqueConstraints = {
         @UniqueConstraint(columnNames={"LENDING_NUMBER"})})
+
 public class LendingSqlEntity {
 
     @Id

@@ -24,9 +24,10 @@ import java.util.Set;
 @Primary
 @Entity
 @Table(name = "T_USER")
+@Inheritance(strategy = InheritanceType.JOINED)
 @EntityListeners(AuditingEntityListener.class)
-// @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-// @DiscriminatorColumn(name = "DTYPE")
+@Getter
+@Setter
 public class UserSqlEntity
 {
     @Id
