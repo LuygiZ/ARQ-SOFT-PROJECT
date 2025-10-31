@@ -15,48 +15,27 @@ import pt.psoft.g1.psoftg1.genremanagement.infrastructure.repositories.impl.sql.
 import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlmapper.PhotoEntityMapper;
 
 @Mapper(componentModel = "spring", uses = {GenreEntityMapper.class, AuthorEntityMapper.class, PhotoEntityMapper.class})
-public interface BookEntityMapper
-{
-    @Mapping(target="title", source="title")
-    @Mapping(target="description", source="description")
-    @Mapping(target="isbn", source="isbn")
-    @Mapping(target="genre", source="genre")
-    @Mapping(target="photoURI", source="photo")
+public interface BookEntityMapper {
+
+    // Entity to Model mapping
+    @Mapping(target = "photoURI", source = "photo")
     Book toModel(BookSqlEntity entity);
 
-    @Mapping(target="title", source="titleObj")
-    @Mapping(target="description", source="descriptionObj")
-    @Mapping(target="isbn", source="isbnObj")
-    @Mapping(target="genre", source="genreObj")
+    // Model to Entity mapping
     BookSqlEntity toEntity(Book model);
 
-    // Title mappings
-    default String map(TitleSqlEntity value) {
-        return value == null ? null : value.getTitle();
+    // Title entity conversion
+    default String map(TitleSqlEntity titleEntity) {
+        return titleEntity == null ? null : titleEntity.getTitle();
     }
 
-    default TitleSqlEntity map(Title value) {
-        return value == null ? null : new TitleSqlEntity(value.getTitle());
+    // ISBN entity conversion
+    default String map(IsbnSqlEntity isbnEntity) {
+        return isbnEntity == null ? null : isbnEntity.getIsbn();
     }
 
-    // Description mappings
-    default String map(DescriptionSqlEntity entity) {
-        return entity == null ? null : entity.getDescription();
-    }
-
-    default DescriptionSqlEntity map(Description value) {
-        if (value == null) return null;
-        DescriptionSqlEntity entity = new DescriptionSqlEntity();
-        entity.setDescription(value.getDescription());
-        return entity;
-    }
-
-    // ISBN mappings
-    default String map(IsbnSqlEntity entity) {
-        return entity == null ? null : entity.toString();
-    }
-
-    default IsbnSqlEntity map(Isbn value) {
-        return value == null ? null : new IsbnSqlEntity(value.toString());
+    // Description entity conversion
+    default String map(DescriptionSqlEntity descEntity) {
+        return descEntity == null ? null : descEntity.getDescription();
     }
 }

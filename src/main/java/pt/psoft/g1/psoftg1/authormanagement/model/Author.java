@@ -37,6 +37,10 @@ public class Author extends EntityWithPhoto
     public long getVersion() { return version; }
     public Name getName() { return name; }
     public Bio getBio() { return bio; }
+    public Long getId() {
+        return authorNumber;
+    }
+
 
     // Setters
     public void setName(Name name)

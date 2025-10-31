@@ -161,7 +161,7 @@ public class BookRepositoryImpl implements BookRepository
 
         // Retrieve the existing Genre model from the repository
         // Throws an exception if the genre is not found
-        Genre genreModel = genreRepo.findByString(book.getGenre())
+        Genre genreModel = genreRepo.findByString(book.getGenre().getGenre())
                 .orElseThrow(() -> new RuntimeException("Genre not found"));
 
         // Get the managed JPA reference for the GenreEntity using its database ID (pk)
