@@ -10,12 +10,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import pt.psoft.g1.psoftg1.bookmanagement.infrastructure.repositories.impl.sql.BookRepositoryImpl;
 import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
+import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
 import pt.psoft.g1.psoftg1.lendingmanagement.infrastructure.repositories.impl.sql.sqlmapper.LendingEntityMapper;
 import pt.psoft.g1.psoftg1.lendingmanagement.model.Lending;
 import pt.psoft.g1.psoftg1.lendingmanagement.model.sql.LendingSqlEntity;
 import pt.psoft.g1.psoftg1.lendingmanagement.repositories.LendingRepository;
 import pt.psoft.g1.psoftg1.readermanagement.infraestructure.repositories.impl.sql.ReaderDetailsRepositoryImpl;
 import pt.psoft.g1.psoftg1.readermanagement.model.ReaderDetails;
+import pt.psoft.g1.psoftg1.readermanagement.model.sql.ReaderDetailsSqlEntity;
 import pt.psoft.g1.psoftg1.shared.services.Page;
 
 import java.time.LocalDate;
@@ -177,38 +179,29 @@ public class LendingRepositoryImpl implements LendingRepository
 
         return lendings;
     }
-
-
+    
     @Override
-    public Lending save(Lending lending)
-    {/* /TODO
-        // Convert the domain model (Lending) to a JPA entity (LendingEntity)
+    public Lending save(Lending lending) {
         LendingSqlEntity entity = lendingEntityMapper.toEntity(lending);
 
-        // Retrieve the existing Book model from the repository
-        // Throws an exception if the book is not found
-        Book bookModel = bookRepo.findByIsbn(lending.getBook().getIsbn().getIsbn())
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+        // Buscar as entidades SQL usando os novos métodos helper
+        BookSqlEntity bookEntity = bookRepo.findSqlEntityByIsbn(
+                lending.getBorrowedBook().getIsbn().toString()
+        ).orElseThrow(() -> new IllegalArgumentException(
+                "Book not found with ISBN: " + lending.getBorrowedBook().getIsbn().toString()));
 
-        // Get the managed JPA reference for the BookEntity using its database ID (pk)
-        // This ensures we use the existing BookEntity instead of creating a new one
-        BookEntity bookEntity = em.getReference(BookEntity.class, bookModel.getPk());
+        ReaderDetailsSqlEntity readerEntity = readerDetailsRepo.findSqlEntityByReaderNumber(
+                lending.getBorrower().getReaderNumber()
+        ).orElseThrow(() -> new IllegalArgumentException(
+                "Reader not found with number: " + lending.getBorrower().getReaderNumber()));
 
+        // Setar as entidades managed
         entity.setBook(bookEntity);
+        entity.setReaderDetails(readerEntity);
 
-        // Retrieve the existing ReaderDetail model from the repository
-        // Throws an exception if the reader is not found
-        ReaderDetails readerDetailsModel = readerDetailsRepo.findByReaderNumber(lending.getReaderDetails().getReaderNumber())
-                .orElseThrow(() -> new RuntimeException("Reader not found"));
-
-        // Get the managed JPA reference for the ReaderDetailEntity using its database ID (pk)
-        // This ensures we use the existing ReaderDetailEntity instead of creating a new one
-        ReaderDetailsEntity readerDetailsEntity = em.getReference(ReaderDetailsEntity.class, readerDetailsModel.getPk());
-
-        entity.setReaderDetails(readerDetailsEntity);
-        return lendingEntityMapper.toModel(lendingRepo.save(entity));
-        */
-        return lending;
+        // Salvar
+        LendingSqlEntity savedEntity = lendingRepo.save(entity);
+        return lendingEntityMapper.toModel(savedEntity);
     }
 
     @Override

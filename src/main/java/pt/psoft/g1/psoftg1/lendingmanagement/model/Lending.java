@@ -15,24 +15,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * The {@code Lending} class associates a {@code Reader} and a {@code Book}.
- * <p>It stores the date it was registered, the date it is supposed to
- * be returned, and the date it actually was returned.
- * It also stores an optional reader {@code commentary} (submitted at the time of the return) and
- * the {@code Fine}, if applicable.
- * <p>It is identified in the system by an auto-generated {@code id}, and has a unique-constrained
- * natural key ({@code LendingNumber}) with its own business rules.
- * @author  rmfranca*/
-/*@Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames={"LENDING_NUMBER"})})*/
 public class Lending {
 
     private Long pk;
     private LendingNumber lendingNumber;
-    private Book book;
-    private ReaderDetails readerDetails;
+    private Book book;  // ✅ MANTÉM ESTE
+    private ReaderDetails readerDetails;  // ✅ MANTÉM ESTE
     private LocalDate startDate;
     private LocalDate limitDate;
     private LocalDate returnedDate;
@@ -41,6 +29,7 @@ public class Lending {
     private Integer daysUntilReturn;
     private Integer daysOverdue;
     private int fineValuePerDayInCents;
+    // ❌ REMOVE borrowedBook e borrower - são duplicados!
 
     public Lending(Book book, ReaderDetails readerDetails, int seq, int lendingDuration, int fineValuePerDayInCents)
     {
@@ -86,6 +75,11 @@ public class Lending {
     // Getters
     public Book getBook() { return book; }
     public ReaderDetails getReaderDetails() { return readerDetails; }
+
+    // ✅ ADICIONA estes métodos que apontam para os mesmos campos
+    public Book getBorrowedBook() { return book; }
+    public ReaderDetails getBorrower() { return readerDetails; }
+
     public LocalDate getStartDate() { return startDate; }
     public LocalDate getLimitDate() { return limitDate; }
     public LocalDate getReturnedDate() { return returnedDate; }
@@ -97,13 +91,6 @@ public class Lending {
         return this.book.getTitle().toString();
     }
 
-    /**
-     * <p>Returns the number of days that the lending is/was past its due date</p>
-     * @return      If the book was returned on time, or there is still time for it be returned, returns 0.
-     * If the book has been returned with delay, returns the number of days of delay.
-     * If the book has not been returned, returns the number of days
-     * past its limit date.
-     */
     public int getDaysDelayed()
     {
         if(returnedDate != null)
@@ -116,12 +103,15 @@ public class Lending {
 
         }
     }
+
     public Optional<Integer> getFineValueInCents()
     {
         int days = getDaysDelayed();
         return days > 0 ? Optional.of(fineValuePerDayInCents * days) : Optional.empty();
     }
+
     public int getFineValuePerDayInCents() { return fineValuePerDayInCents; }
+
     public Optional<Integer> getDaysUntilReturn()
     {
         setDaysUntilReturn();
@@ -134,17 +124,6 @@ public class Lending {
         return Optional.ofNullable(daysOverdue);
     }
 
-
-    // Setters
-    /**
-     * <p>Sets {@code commentary} and the current date as {@code returnedDate}.
-     * <p>If {@code returnedDate} is after {@code limitDate}, fine is applied with corresponding value.
-     *
-     * @param       desiredVersion to prevent editing a stale object.
-     * @param       commentary written by a reader.
-     * @throws      StaleObjectStateException if object was already modified by another user.
-     * @throws      IllegalArgumentException  if {@code returnedDate} already has a value.
-     */
     public void setReturned(final long desiredVersion, final String commentary){
 
         if (this.returnedDate != null)
@@ -152,7 +131,6 @@ public class Lending {
             throw new IllegalArgumentException("book has already been returned!");
         }
 
-        // check current version
         if (this.version != desiredVersion)
         {
             throw new StaleObjectStateException("Object was already modified by another user", this.pk);
@@ -186,7 +164,6 @@ public class Lending {
 
     protected Lending() {}
 
-    /**Factory method meant to be only used in bootstrapping.*/
     public static Lending newBootstrappingLending(Book book,
                                                   ReaderDetails readerDetails,
                                                   int year,

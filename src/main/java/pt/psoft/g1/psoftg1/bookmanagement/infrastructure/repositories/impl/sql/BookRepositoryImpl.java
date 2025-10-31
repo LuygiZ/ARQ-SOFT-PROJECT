@@ -207,4 +207,9 @@ public class BookRepositoryImpl implements BookRepository
     {
         // TODO: implement delete logic
     }
+
+    // Adiciona este método público
+    public Optional<BookSqlEntity> findSqlEntityByIsbn(String isbn) {
+        return bookRepo.findByIsbn(isbn);
+    }
 }

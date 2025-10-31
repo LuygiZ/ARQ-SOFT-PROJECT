@@ -3,17 +3,18 @@ package pt.psoft.g1.psoftg1.lendingmanagement.model.sql;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import pt.psoft.g1.psoftg1.bookmanagement.model.sql.BookSqlEntity;
 import pt.psoft.g1.psoftg1.readermanagement.model.sql.ReaderDetailsSqlEntity;
-
 import java.time.LocalDate;
 
 @Profile("sql")
 @Primary
 @Entity
+@Data
 @Table(name="Lending", uniqueConstraints = {
         @UniqueConstraint(columnNames={"LENDING_NUMBER"})})
 
@@ -27,8 +28,8 @@ public class LendingSqlEntity {
     private LendingNumberSqlEntity lendingNumber;
 
     @NotNull
-    @Getter
-    @ManyToOne(fetch=FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "book_fk")
     private BookSqlEntity book;
 
     @NotNull

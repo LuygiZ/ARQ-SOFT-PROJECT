@@ -190,4 +190,9 @@ public class ReaderDetailsRepositoryImpl implements ReaderRepository
 
         return readerDetails;
     }
+
+    // Adiciona este método público
+    public Optional<ReaderDetailsSqlEntity> findSqlEntityByReaderNumber(String readerNumber) {
+        return readerRepo.findByReaderNumber(readerNumber);
+    }
 }

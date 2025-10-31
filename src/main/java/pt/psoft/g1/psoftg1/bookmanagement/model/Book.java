@@ -80,6 +80,9 @@ public class Book extends EntityWithPhoto {
     }
 
     // Getters - Value Objects
+
+    public Long getPk() { return pk; }
+
     public Isbn getIsbnObj() {
         return this.isbn;
     }
