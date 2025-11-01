@@ -8,7 +8,7 @@ import pt.psoft.g1.psoftg1.shared.model.sql.EntityWithPhotoSqlEntity;
 import pt.psoft.g1.psoftg1.shared.model.sql.NameSqlEntity;
 import pt.psoft.g1.psoftg1.shared.model.sql.PhotoSqlEntity;
 
-@Profile("sql")
+@Profile("sql-redis")
 @Primary
 @Entity
 @Table(name = "AUTHOR")  // ADICIONA ESTA LINHA
