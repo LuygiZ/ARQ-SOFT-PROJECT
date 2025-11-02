@@ -2,685 +2,679 @@ pipeline {
 	agent any
 
 	triggers {
-		githubPush()  // Trigger automático ao fazer push para GitHub
+		githubPush()
 	}
 
 	tools {
-		maven 'Maven 3.9.11'  // Certifica-te que tens este nome no Jenkins
+		maven 'Maven 3.9.11'
 	}
 
 	parameters {
 		choice(
 			name: 'Environment',
 			choices: ["docker", "local"],
-			description: 'Escolhe o ambiente para executar a pipeline (docker ou local).'
-		)
-		choice(
-			name: 'DeploymentTarget',
-			choices: ["dev", "staging", "production"],
-			description: 'Escolhe o ambiente de deployment (DEV, STAGING ou PRODUCTION).'
+			description: 'Choose an Environment.'
 		)
 	}
 
 	environment {
-		// Maven Tool
 		MAVEN_DIR = tool(name: 'Maven 3.9.11', type: 'maven')
+		APP_NAME = 'psoft-g1'
+		//         JAR_NAME = 'psoft-g1-0.0.1-SNAPSHOT.jar'
 
-		// Redis Configuration
-		REDIS_HOST = 'host.docker.internal'
-		REDIS_PORT = '6379'
-		REDIS_CONTAINER = 'fervent_benz'
-
-		// Application Ports
+		// Portas para cada ambiente
 		DEV_PORT = '8080'
 		STAGING_PORT = '8081'
 		PROD_PORT = '8082'
 
-		// Docker Configuration
-		DOCKER_IMAGE_NAME = 'library-management-service'
-		BUILD_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'local'}"
-
-		// SonarQube Mapping
-		SONAR_SERVER_DOCKER = 'sonarqube_docker'
-		SONAR_SERVER_LOCAL = 'sonarqube_local'
-	}
-
-	options {
-		buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '5'))
-		timeout(time: 1, unit: 'HOURS')
-		timestamps()
-		disableConcurrentBuilds()
+		// Paths para deploy local
+		DEPLOY_BASE_PATH = '/opt/deployments'
 	}
 
 	stages {
-		// ========================================
-		// STAGE 1: CHECKOUT
-		// ========================================
 		stage('Checkout') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 1: Checkout do Repositório                  ║'
-				echo '╚════════════════════════════════════════════════════╝'
+				echo '📥 A fazer checkout do repositório...'
 				checkout scm
-				script {
-					// Capturar informação do Git
-					env.GIT_COMMIT_SHORT = sh(
-						script: "git rev-parse --short HEAD || echo 'local'",
-						returnStdout: true
-					).trim()
-					env.GIT_BRANCH = sh(
-						script: "git rev-parse --abbrev-ref HEAD || echo 'unknown'",
-						returnStdout: true
-					).trim()
-
-					echo "✓ Branch: ${env.GIT_BRANCH}"
-					echo "✓ Commit: ${env.GIT_COMMIT_SHORT}"
-					echo "✓ Build: ${env.BUILD_TAG}"
-				}
 			}
 		}
 
-		// ========================================
-		// STAGE 2: BUILD & COMPILE
-		// ========================================
 		stage('Build & Compile') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 2: Build & Compile                          ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					echo '🔨 Cleaning workspace and compiling...'
-					if (isUnix()) {
-						sh 'mvn clean compile test-compile'
-					} else {
-						bat 'mvn clean compile test-compile'
+					echo '🔨 Cleaning workspace...'
+					if (isUnix())
+					{
+						sh "mvn clean compile test-compile"
 					}
-					echo '✓ Compilation completed successfully'
-				}
-			}
-		}
-
-		// ========================================
-		// STAGE 3: UNIT & INTEGRATION TESTS (PARALLEL)
-		// ========================================
-		stage('Unit & Integration Tests') {
-			parallel {
-				stage('Unit Tests') {
-					steps {
-						echo '╔════════════════════════════════════════════════════╗'
-						echo '║  STAGE 3a: Unit Tests                              ║'
-						echo '╚════════════════════════════════════════════════════╝'
-						script {
-							echo '🧪 Running unit tests...'
-							if (isUnix()) {
-								sh 'mvn surefire:test'
-							} else {
-								bat 'mvn surefire:test'
-							}
-							echo '✓ Unit tests completed'
-						}
-					}
-					post {
-						always {
-							// Publicar resultados dos testes unitários
-							junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-						}
-					}
-				}
-
-				stage('Integration Tests') {
-					steps {
-						echo '╔════════════════════════════════════════════════════╗'
-						echo '║  STAGE 3b: Integration Tests                       ║'
-						echo '╚════════════════════════════════════════════════════╝'
-						script {
-							echo '🔗 Running integration tests...'
-							echo "ℹ️  Using Redis at ${REDIS_HOST}:${REDIS_PORT}"
-
-							if (isUnix()) {
-								sh '''
-                                    mvn failsafe:integration-test failsafe:verify \
-                                        -Dspring.redis.host=${REDIS_HOST} \
-                                        -Dspring.redis.port=${REDIS_PORT}
-                                '''
-							} else {
-								bat '''
-                                    mvn failsafe:integration-test failsafe:verify ^
-                                        -Dspring.redis.host=%REDIS_HOST% ^
-                                        -Dspring.redis.port=%REDIS_PORT%
-                                '''
-							}
-							echo '✓ Integration tests completed'
-						}
-					}
-					post {
-						always {
-							// Publicar resultados dos testes de integração
-							junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/*.xml'
-						}
+					else
+					{
+						bat "mvn clean compile test-compile"
 					}
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 4: CODE COVERAGE (JACOCO)
-		// ========================================
-		stage('Code Coverage') {
+
+		// correr em parelelo os testes
+		// parallel {}
+
+		stage('Unit Tests') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 4: Code Coverage Analysis (JaCoCo)          ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					echo '📊 Generating code coverage report...'
-					if (isUnix()) {
-						sh '''
-                            mvn jacoco:report
-                            mvn jacoco:check -Djacoco.minimum.coverage=0.80 || echo "⚠️  Coverage below 80%"
-                        '''
-					} else {
-						bat '''
-                            mvn jacoco:report
-                            mvn jacoco:check -Djacoco.minimum.coverage=0.80 || echo "⚠️  Coverage below 80%"
-                        '''
+					echo 'Running unit tests...'
+					if (isUnix())
+					{
+						sh "mvn surefire:test"
 					}
-					echo '✓ Coverage report generated'
+					else
+					{
+						bat "mvn surefire:test"
+					}
 				}
 			}
 			post {
 				always {
-					// Publicar relatório JaCoCo
+					junit '**/target/surefire-reports/*.xml'
+					publishHTML(target: [
+						allowMissing: false,
+						alwaysLinkToLastBuild: true,
+						keepAll: true,
+						reportDir: 'target/surefire-reports',
+						reportFiles: 'index.html',
+						reportName: 'Unit Tests Report'
+					])
+				}
+			}
+		}
+
+		stage('Integration Tests') {
+			steps {
+				script {
+					echo 'Running integration tests...'
+					if (isUnix())
+					{
+						sh "mvn failsafe:integration-test failsafe:verify"
+					}
+					else
+					{
+						bat "mvn failsafe:integration-test failsafe:verify"
+					}
+				}
+			}
+		}
+
+		stage('Test Coverage') {
+			steps {
+				script {
+					echo '📊 Gerando relatório de cobertura...'
+					if (isUnix()) {
+						sh "mvn jacoco:report"
+					} else {
+						bat "mvn jacoco:report"
+					}
+				}
+			}
+			post {
+				always {
 					jacoco(
 						execPattern: '**/target/jacoco.exec',
 						classPattern: '**/target/classes',
 						sourcePattern: '**/src/main/java',
-						exclusionPattern: '**/test/**'
+						inclusionPattern: '**/*.class',
+						minimumInstructionCoverage: '60',
+						minimumBranchCoverage: '50'
 					)
-
-					// Publicar HTML report
-					publishHTML([
+					publishHTML(target: [
 						allowMissing: false,
 						alwaysLinkToLastBuild: true,
 						keepAll: true,
 						reportDir: 'target/site/jacoco',
 						reportFiles: 'index.html',
-						reportName: 'JaCoCo Coverage Report',
-						reportTitles: 'Code Coverage'
+						reportName: 'JaCoCo Coverage Report'
 					])
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 5: MUTATION TESTING (PITEST)
-		// ========================================
 		stage('Mutation Tests') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 5: Mutation Testing (PIT)                   ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					echo '🧬 Running mutation tests...'
-					if (isUnix()) {
-						sh 'mvn org.pitest:pitest-maven:mutationCoverage'
-					} else {
-						bat 'mvn org.pitest:pitest-maven:mutationCoverage'
+					echo 'Running mutation tests...'
+					if (isUnix())
+					{
+						sh "mvn org.pitest:pitest-maven:mutationCoverage"
 					}
-					echo '✓ Mutation testing completed'
+					else
+					{
+						bat "mvn org.pitest:pitest-maven:mutationCoverage"
+					}
 				}
 			}
 			post {
 				always {
-					// Publicar relatório de mutation testing
-					publishHTML([
+					publishHTML(target: [
 						allowMissing: false,
 						alwaysLinkToLastBuild: true,
 						keepAll: true,
 						reportDir: 'target/pit-reports',
 						reportFiles: 'index.html',
-						reportName: 'PIT Mutation Testing Report',
-						reportTitles: 'Mutation Coverage'
+						reportName: 'PIT Mutation Report'
 					])
 				}
 			}
+
 		}
 
-		// ========================================
-		// STAGE 6: SONARQUBE ANALYSIS
-		// ========================================
 		stage('SonarQube Analysis') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 6: SonarQube Static Code Analysis          ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					// Mapear ambiente para servidor SonarQube
 					def ENVIRONMENT_2_SONARQUBE_SERVER = [
-						'docker': env.SONAR_SERVER_DOCKER,
-						'local' : env.SONAR_SERVER_LOCAL
+						'docker': 'sonarqube_docker',
+						'local' : 'sonarqube_local'
 					]
 
 					def sonarServer = ENVIRONMENT_2_SONARQUBE_SERVER[params.Environment]
-					echo "🔍 Running SonarQube analysis using server: ${sonarServer}"
-
-					// Verificar se SonarQube está disponível
-					try {
-						withSonarQubeEnv(sonarServer) {
-							if (isUnix()) {
-								sh 'mvn verify sonar:sonar'
-							} else {
-								bat 'mvn verify sonar:sonar'
-							}
+					echo "Running SonarQube analysis using server: ${sonarServer}"
+					withSonarQubeEnv(sonarServer)
+					{
+						if (isUnix())
+						{
+							sh "mvn verify -X sonar:sonar"
 						}
-						echo '✓ SonarQube analysis completed'
-					} catch (Exception e) {
-						echo "⚠️  SonarQube not available: ${e.message}"
-						echo "Continuing pipeline without SonarQube analysis..."
+						else
+						{
+							bat "mvn verify -X sonar:sonar"
+						}
 					}
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 7: QUALITY GATE 1
-		// ========================================
-		stage('Quality Gate 1') {
-			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 7: Quality Gate 1 (QG1)                     ║'
-				echo '╚════════════════════════════════════════════════════╝'
-				script {
-					try {
-						timeout(time: 3, unit: 'MINUTES') {
-							def qg = waitForQualityGate()
-							if (qg.status != 'OK') {
-								echo "⚠️  Quality Gate failed: ${qg.status}"
-								echo "Continuing pipeline with warning..."
-							} else {
-								echo '✓ Quality Gate 1 PASSED!'
-							}
-						}
-					} catch (Exception e) {
-						echo "⚠️  Quality Gate check skipped: ${e.message}"
-						echo "Continuing pipeline..."
-					}
-				}
-			}
-		}
+		//         stage('Quality Gate') {
+		//             steps {
+		//                 timeout(time: 3, unit: 'MINUTES') {
+		//                     waitForQualityGate abortPipeline: true
+		//                 }
+		//             }
+		//         }
 
-		// ========================================
-		// STAGE 8: PACKAGE
-		// ========================================
 		stage('Package') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 8: Package Application                      ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					echo '📦 Building final package...'
+					echo '📦 Building the final package...'
 					if (isUnix()) {
 						sh 'mvn package -DskipTests'
+						// Captura o nome do JAR
+						def jarPath = sh(script: "find target -name '*.jar' -type f | head -1", returnStdout: true).trim()
+						env.JAR_NAME = sh(script: "basename ${jarPath}", returnStdout: true).trim()
 					} else {
 						bat 'mvn package -DskipTests'
+						// Captura o nome do JAR no Windows
+
+						bat 'dir /b target\\*.jar > jarname.txt'
+						def jarName = readFile('jarname.txt').trim()
+						env.JAR_NAME = jarName
+
 					}
-					echo '✓ Package created successfully'
+					echo "📦 JAR gerado: ${env.JAR_NAME}"
+					currentBuild.displayName = "#${env.BUILD_NUMBER} - ${env.JAR_NAME}"
+
 				}
 			}
 			post {
 				success {
-					// Arquivar artefactos
 					archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-					echo '✓ Artifacts archived'
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 9: BUILD DOCKER IMAGE
-		// ========================================
-		stage('Build Docker Image') {
-			when {
-				expression { params.Environment == 'docker' }
-			}
+		stage('Deploy to DEV') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 9: Build Docker Image                       ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					echo "🐳 Building Docker image: ${DOCKER_IMAGE_NAME}:${BUILD_TAG}"
-
-					// Criar Dockerfile se não existir
-					if (isUnix()) {
-						sh '''
-                            if [ ! -f Dockerfile ]; then
-                                cat > Dockerfile << 'EOF'
-FROM eclipse-temurin:17-jre-alpine
-WORKDIR /app
-COPY target/*.jar app.jar
-EXPOSE 8080
-ENV SPRING_PROFILES_ACTIVE=dev
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 \\
-  CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
-ENTRYPOINT ["java", "-jar", "app.jar"]
-EOF
-                            fi
-                        '''
-
-						sh """
-                            docker build -t ${DOCKER_IMAGE_NAME}:${BUILD_TAG} .
-                            docker tag ${DOCKER_IMAGE_NAME}:${BUILD_TAG} ${DOCKER_IMAGE_NAME}:latest
-                        """
+					echo '🚀 Deploying to DEVELOPMENT environment...'
+					echo "📦 Using JAR: ${env.JAR_NAME}"
+					if (params.Environment == 'docker') {
+						deployDocker('dev', env.DEV_PORT)
 					} else {
-						bat """
-                            docker build -t ${DOCKER_IMAGE_NAME}:${BUILD_TAG} .
-                            docker tag ${DOCKER_IMAGE_NAME}:${BUILD_TAG} ${DOCKER_IMAGE_NAME}:latest
-                        """
+						deployLocal('dev', env.DEV_PORT)
 					}
-
-					echo "✓ Docker image built: ${DOCKER_IMAGE_NAME}:${BUILD_TAG}"
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 10: VERIFY REDIS CONNECTION
-		// ========================================
-		stage('Verify Redis Connection') {
+		stage('Smoke Test DEV') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 10: Verify Redis Connection                ║'
-				echo '╚════════════════════════════════════════════════════╝'
 				script {
-					echo "🔍 Checking Redis container: ${REDIS_CONTAINER}"
+					echo '💨 Running smoke tests on DEV...'
+					smokeTest(env.DEV_PORT, 'dev')
+				}
+			}
+		}
 
-					if (isUnix()) {
-						def redisStatus = sh(
-							script: "docker exec ${REDIS_CONTAINER} redis-cli ping || echo 'FAILED'",
-							returnStdout: true
-						).trim()
-
-						if (redisStatus.contains('PONG')) {
-							echo '✓ Redis is responding'
-
-							// Get Redis info
-							sh """
-                                echo "Redis Statistics:"
-                                docker exec ${REDIS_CONTAINER} redis-cli INFO stats | grep keyspace
-                            """
-						} else {
-							echo '⚠️  Redis not responding'
-						}
+		stage('Deploy to STAGING') {
+			steps {
+				script {
+					echo '🚀 Deploying to STAGING environment...'
+					if (params.Environment == 'docker') {
+						deployDocker('staging', env.STAGING_PORT)
 					} else {
-						bat "docker exec ${REDIS_CONTAINER} redis-cli ping"
+						deployLocal('staging', env.STAGING_PORT)
 					}
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 11: DEPLOY TO ENVIRONMENT
-		// ========================================
-		stage('Deploy to Environment') {
-			when {
-				expression { params.Environment == 'docker' }
-			}
+		stage('Smoke Test STAGING') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo "║  STAGE 11: Deploy to ${params.DeploymentTarget.toUpperCase()}                       ║"
-				echo '╚════════════════════════════════════════════════════╝'
-
 				script {
-					// Definir porta baseada no ambiente
-					def targetPort = ''
-					def containerName = ''
-					def profile = ''
+					echo '💨 Running smoke tests on STAGING...'
+					smokeTest(env.STAGING_PORT, 'staging')
+				}
+			}
+		}
 
-					switch(params.DeploymentTarget) {
-					case 'dev':
-					targetPort = env.DEV_PORT
-					containerName = 'library-app-dev'
-					profile = 'dev'
-					break
-					case 'staging':
-					targetPort = env.STAGING_PORT
-					containerName = 'library-app-staging'
-					profile = 'staging'
-					// Pedir aprovação para STAGING
-					input message: "Deploy to STAGING?", ok: "Deploy"
-					break
-					case 'production':
-					targetPort = env.PROD_PORT
-					containerName = 'library-app-prod'
-					profile = 'prod'
-					// Pedir aprovação ADMIN para PRODUCTION
-					input message: "⚠️  Deploy to PRODUCTION? This is FINAL!", ok: "DEPLOY TO PROD", submitter: 'admin'
-					break
-					}
-
-					echo "🚀 Deploying to ${params.DeploymentTarget.toUpperCase()}"
-					echo "   Port: ${targetPort}"
-					echo "   Container: ${containerName}"
-					echo "   Profile: ${profile}"
-
-					if (isUnix()) {
-						sh """
-                            # Stop and remove existing container
-                            docker stop ${containerName} 2>/dev/null || true
-                            docker rm ${containerName} 2>/dev/null || true
-
-                            # Run new container
-                            docker run -d \\
-                                --name ${containerName} \\
-                                -p ${targetPort}:8080 \\
-                                -e SPRING_PROFILES_ACTIVE=${profile} \\
-                                -e SPRING_REDIS_HOST=${REDIS_HOST} \\
-                                -e SPRING_REDIS_PORT=${REDIS_PORT} \\
-                                -e SPRING_CACHE_TYPE=redis \\
-                                --restart unless-stopped \\
-                                ${DOCKER_IMAGE_NAME}:${BUILD_TAG}
-
-                            # Wait for application to start
-                            echo "⏳ Waiting for application to start..."
-                            sleep 15
-                        """
-
-						echo "✓ Application deployed to ${params.DeploymentTarget.toUpperCase()}"
-						echo "✓ Access at: http://localhost:${targetPort}"
+		stage('Deploy to PRODUCTION') {
+			steps {
+				//                         input message: 'Deploy to PRODUCTION?', ok: 'Deploy'
+				script {
+					echo '🚀 Deploying to PRODUCTION environment...'
+					if (params.Environment == 'docker') {
+						deployDocker('production', env.PROD_PORT)
 					} else {
-						bat """
-                            docker stop ${containerName} 2>nul || ver>nul
-                            docker rm ${containerName} 2>nul || ver>nul
-
-                            docker run -d ^
-                                --name ${containerName} ^
-                                -p ${targetPort}:8080 ^
-                                -e SPRING_PROFILES_ACTIVE=${profile} ^
-                                -e SPRING_REDIS_HOST=${REDIS_HOST} ^
-                                -e SPRING_REDIS_PORT=${REDIS_PORT} ^
-                                ${DOCKER_IMAGE_NAME}:${BUILD_TAG}
-                        """
+						deployLocal('production', env.PROD_PORT)
 					}
 				}
 			}
 		}
 
-		// ========================================
-		// STAGE 12: HEALTH CHECK
-		// ========================================
-		stage('Health Check') {
-			when {
-				expression { params.Environment == 'docker' }
-			}
+		stage('Smoke Test PRODUCTION') {
 			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 12: Health Check                            ║'
-				echo '╚════════════════════════════════════════════════════╝'
-
 				script {
-					def targetPort = ''
-
-					switch(params.DeploymentTarget) {
-					case 'dev':
-					targetPort = env.DEV_PORT
-					break
-					case 'staging':
-					targetPort = env.STAGING_PORT
-					break
-					case 'production':
-					targetPort = env.PROD_PORT
-					break
-					}
-
-					echo "🏥 Checking application health on port ${targetPort}..."
-
-					if (isUnix()) {
-						retry(3) {
-							sleep 5
-							sh """
-                                curl -f http://localhost:${targetPort}/actuator/health || \
-                                curl -f http://localhost:${targetPort}/ || \
-                                echo "Health check in progress..."
-                            """
-						}
-					} else {
-						bat "timeout /t 5 /nobreak"
-						bat "curl http://localhost:${targetPort}/actuator/health || echo Health check"
-					}
-
-					echo "✓ Health check completed"
-				}
-			}
-		}
-
-		// ========================================
-		// STAGE 13: QUALITY GATE FINAL
-		// ========================================
-		stage('Quality Gate Final') {
-			when {
-				expression { params.DeploymentTarget == 'production' }
-			}
-			steps {
-				echo '╔════════════════════════════════════════════════════╗'
-				echo '║  STAGE 13: Quality Gate Final (QG4)                ║'
-				echo '╚════════════════════════════════════════════════════╝'
-
-				script {
-					echo '🎯 Running final quality checks for PRODUCTION...'
-
-					// Verificar se aplicação está respondendo
-					if (isUnix()) {
-						def healthStatus = sh(
-							script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:${PROD_PORT}/actuator/health || echo '000'",
-							returnStdout: true
-						).trim()
-
-						if (healthStatus == '200') {
-							echo '✓✓✓ PRODUCTION deployment successful! ✓✓✓'
-							echo "✓ Application is live on port ${PROD_PORT}"
-						} else {
-							error "❌ PRODUCTION health check failed! Status: ${healthStatus}"
-						}
-					}
+					echo '💨 Running smoke tests on PRODUCTION...'
+					smokeTest(env.PROD_PORT, 'production')
 				}
 			}
 		}
 	}
 
-	// ========================================
-	// POST ACTIONS
-	// ========================================
 	post {
 		success {
-			echo '╔════════════════════════════════════════════════════╗'
-			echo '║  ✓✓✓ PIPELINE COMPLETED SUCCESSFULLY! ✓✓✓         ║'
-			echo '╚════════════════════════════════════════════════════╝'
-
+			echo '✅ Pipeline completed successfully!'
 			script {
-				echo """
-                📊 Build Summary:
-                   Build Number: ${env.BUILD_NUMBER}
-                   Git Branch: ${env.GIT_BRANCH}
-                   Git Commit: ${env.GIT_COMMIT_SHORT}
-                   Environment: ${params.Environment}
-                   Deployment: ${params.DeploymentTarget}
-                """
+				def deploymentSummary = """
+                    ═══════════════════════════════════════════════════
+                            DEPLOYMENT SUCCESSFUL
+                    ═══════════════════════════════════════════════════
+                    Build: #${env.BUILD_NUMBER}
+                    Deployment Type: ${params.Environment}
 
-				if (params.Environment == 'docker') {
-					def targetPort = ''
-					switch(params.DeploymentTarget) {
-					case 'dev': targetPort = env.DEV_PORT; break
-					case 'staging': targetPort = env.STAGING_PORT; break
-					case 'production': targetPort = env.PROD_PORT; break
-					}
-					echo "🌐 Application URL: http://localhost:${targetPort}"
-				}
+                    Environments deployed:
+                      🟢 DEV        → http://localhost:${env.DEV_PORT}
+                      🟢 STAGING    → http://localhost:${env.STAGING_PORT}
+                      🟢 PRODUCTION → http://localhost:${env.PROD_PORT}
 
-				// Log de sucesso
-				if (isUnix()) {
-					sh """
-                        echo "\$(date): Build ${env.BUILD_NUMBER} - SUCCESS" >> deployment-history.log
+                    Build URL: ${env.BUILD_URL}
+                    ═══════════════════════════════════════════════════
                     """
-				}
+				echo deploymentSummary
 			}
 		}
 
 		failure {
-			echo '╔════════════════════════════════════════════════════╗'
-			echo '║  ❌❌❌ PIPELINE FAILED! ❌❌❌                       ║'
-			echo '╚════════════════════════════════════════════════════╝'
-
+			echo '❌ Pipeline failed!'
 			script {
 				echo """
-                ❌ Build Failed:
-                   Build Number: ${env.BUILD_NUMBER}
-                   Stage: ${env.STAGE_NAME}
-                   Check logs above for details
+                ═══════════════════════════════════════════════════
+                        PIPELINE FAILED
+                ═══════════════════════════════════════════════════
+                Build: #${env.BUILD_NUMBER}
+                Check the logs at: ${env.BUILD_URL}console
+                ═══════════════════════════════════════════════════
                 """
-
-				// Rollback em caso de falha em produção
-				if (params.DeploymentTarget == 'production' && params.Environment == 'docker') {
-					echo '🔄 Initiating automatic rollback...'
-
-					if (isUnix()) {
-						sh """
-                            docker stop library-app-prod 2>/dev/null || true
-                            docker rm library-app-prod 2>/dev/null || true
-
-                            # Restaurar versão anterior se existir
-                            if docker image inspect ${DOCKER_IMAGE_NAME}:prod-backup >/dev/null 2>&1; then
-                                docker run -d \\
-                                    --name library-app-prod \\
-                                    -p ${PROD_PORT}:8080 \\
-                                    -e SPRING_PROFILES_ACTIVE=prod \\
-                                    -e SPRING_REDIS_HOST=${REDIS_HOST} \\
-                                    ${DOCKER_IMAGE_NAME}:prod-backup
-
-                                echo "✓ Rollback completed - Previous version restored"
-                            fi
-                        """
-					}
-				}
 			}
 		}
 
-		unstable {
-			echo '⚠️  Pipeline completed with warnings'
+		always
+		{
+			echo 'Performing cleanup...'
+			// Cleanup code
 		}
+	}
+}
 
-		always {
-			echo '╔════════════════════════════════════════════════════╗'
-			echo '║  Cleanup & Finalization                            ║'
-			echo '╚════════════════════════════════════════════════════╝'
+// ═══════════════════════════════════════════════════
+//              DEPLOYMENT FUNCTIONS
+// ═══════════════════════════════════════════════════
 
-			script {
-				// Publicar todos os reports
-				echo '📊 Publishing all reports...'
+def deployDocker(environment, port) {
+	def imageName = "${env.APP_NAME}:${environment}"
+	def containerName = "${env.APP_NAME}-${environment}"
+	def networkName = "psoft-network"
+	def redisContainerName = "redis-${environment}"
 
-				// Cleanup (opcional)
-				// cleanWs()
+	echo "🐳 Deploying ${environment} with Docker on port ${port}"
 
-				echo '✓ Pipeline finalized'
-			}
-		}
+	if (isUnix()) {
+		sh """
+            # Cria rede Docker se não existir
+            if ! docker network inspect ${networkName} > /dev/null 2>&1; then
+                echo "Creating Docker network: ${networkName}"
+                docker network create ${networkName}
+            else
+                echo "Docker network ${networkName} already exists"
+            fi
+
+            # Verifica/inicia Redis
+            if ! docker ps --format '{{.Names}}' | grep -q "^${redisContainerName}\$"; then
+                echo "Starting Redis container for ${environment}..."
+                docker stop ${redisContainerName} 2>/dev/null || true
+                docker rm ${redisContainerName} 2>/dev/null || true
+
+                docker run -d \\
+                    --name ${redisContainerName} \\
+                    --network ${networkName} \\
+                    redis:latest
+
+                echo "Waiting for Redis to be ready..."
+                sleep 5
+            else
+                echo "Redis container ${redisContainerName} already running"
+            fi
+
+            # Remove container antigo se existir
+            echo "Checking for existing container: ${containerName}"
+            if docker ps -a --format '{{.Names}}' | grep -q "^${containerName}\$"; then
+                echo "Stopping existing container..."
+                docker stop ${containerName} || true
+                echo "Removing existing container..."
+                docker rm ${containerName} || true
+            fi
+
+            # Remove imagem antiga se existir
+            if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${imageName}\$"; then
+                echo "Removing old image..."
+                docker rmi ${imageName} || true
+            fi
+
+            # Cria Dockerfile se não existir
+            if [ ! -f Dockerfile ]; then
+                echo "Creating Dockerfile..."
+                cat > Dockerfile << 'EOF'
+            FROM openjdk:17-jdk-slim
+            WORKDIR /app
+            COPY target/*.jar app.jar
+            EXPOSE 8080
+            ENV JAVA_OPTS=""
+            ENTRYPOINT ["java", "-jar", "app.jar"]
+            EOF
+            fi
+
+            # Build da nova imagem
+            echo "Building Docker image: ${imageName}"
+            docker build -t ${imageName} .
+
+            # Inicia novo container
+            echo "Starting new container: ${containerName}"
+            docker run -d \\
+                --name ${containerName} \\
+                --network ${networkName} \\
+                -p ${port}:8080 \\
+                -e SERVER_PORT=8080 \\
+                -e SPRING_DATA_REDIS_HOST=${redisContainerName} \\
+                -e SPRING_DATA_REDIS_PORT=6379 \\
+                ${imageName}
+
+
+            # Aguarda e verifica se o container está rodando
+            echo "Waiting for container to start..."
+            sleep 10
+
+            if docker ps --format '{{.Names}}' | grep -q "^${containerName}\$"; then
+                echo "✅ Container ${containerName} is running!"
+                docker ps --filter "name=${containerName}" --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"
+                echo ""
+                echo "📋 Container logs (last 50 lines):"
+                docker logs --tail 50 ${containerName}
+            else
+                echo "❌ Container failed to start or stopped!"
+                echo "📋 Full container logs:"
+                docker logs ${containerName}
+                echo ""
+                echo "💡 Container status:"
+                docker ps -a --filter "name=${containerName}"
+                exit 1
+            fi
+        """
+	} else {
+		bat """
+            @echo off
+
+            REM Cria rede Docker se não existir
+            docker network inspect ${networkName} >nul 2>&1
+            if errorlevel 1 (
+                echo Creating Docker network: ${networkName}
+                docker network create ${networkName}
+            ) else (
+                echo Docker network ${networkName} already exists
+            )
+
+            REM Verifica/inicia Redis
+            docker ps --format "{{.Names}}" | findstr /X "${redisContainerName}" >nul 2>&1
+            if errorlevel 1 (
+                echo Starting Redis container for ${environment}...
+                docker stop ${redisContainerName} 2>nul
+                docker rm ${redisContainerName} 2>nul
+
+                docker run -d ^
+                    --name ${redisContainerName} ^
+                    --network ${networkName} ^
+                    redis:latest
+
+                echo Waiting for Redis to be ready...
+                ping 127.0.0.1 -n 6 > NUL
+            ) else (
+                echo Redis container ${redisContainerName} already running
+            )
+
+            echo Checking for existing container: ${containerName}
+            docker ps -a --format "{{.Names}}" | findstr /X "${containerName}" >nul 2>&1
+            if %errorlevel% equ 0 (
+                echo Stopping existing container...
+                docker stop ${containerName} || echo Container already stopped
+                echo Removing existing container...
+                docker rm ${containerName} || echo Container already removed
+            )
+
+            echo Checking for existing image: ${imageName}
+            docker images --format "{{.Repository}}:{{.Tag}}" | findstr /X "${imageName}" >nul 2>&1
+            if %errorlevel% equ 0 (
+                echo Removing old image...
+                docker rmi ${imageName} || echo Image already removed
+            )
+
+            if not exist Dockerfile (
+                echo Creating Dockerfile...
+                (
+                    echo FROM openjdk:17-jdk-slim
+                    echo WORKDIR /app
+                    echo COPY target/*.jar app.jar
+                    echo EXPOSE 8080
+                    echo ENTRYPOINT ["java", "-jar", "app.jar"]
+                ) > Dockerfile
+            )
+
+            echo Building Docker image: ${imageName}
+            docker build -t ${imageName} .
+
+            echo Starting new container: ${containerName}
+            docker run -d ^
+                --name ${containerName} ^
+                --network ${networkName} ^
+                -p ${port}:8080 ^
+                -e SERVER_PORT=8080 ^
+                -e SPRING_DATA_REDIS_HOST=${redisContainerName} ^
+                -e SPRING_DATA_REDIS_PORT=6379 ^
+                --restart unless-stopped ^
+                ${imageName}
+
+            timeout /t 5 /nobreak >nul
+            docker ps --filter "name=${containerName}"
+        """
+	}
+}
+
+def deployLocal(environment, port) {
+	echo "📁 Deploying ${environment} locally on port ${port}"
+
+	if (isUnix()) {
+		def deployPath = "${env.DEPLOY_BASE_PATH}/${environment}"
+		sh """
+            # Cria diretório se não existir
+            mkdir -p ${deployPath}
+
+            # Copia o JAR
+            echo "Copying JAR ${env.JAR_NAME} to ${deployPath}..."
+            cp target/${env.JAR_NAME} ${deployPath}/${env.JAR_NAME}
+
+            # Para aplicação existente
+            if [ -f ${deployPath}/app.pid ]; then
+                OLD_PID=\$(cat ${deployPath}/app.pid)
+                if ps -p \$OLD_PID > /dev/null 2>&1; then
+                    echo "Stopping existing application (PID: \$OLD_PID)..."
+                    kill \$OLD_PID || true
+                    sleep 3
+                    kill -9 \$OLD_PID 2>/dev/null || true
+                fi
+            fi
+
+            # Mata qualquer processo na porta
+            lsof -ti:${port} | xargs kill -9 2>/dev/null || true
+
+            # Inicia nova aplicação
+            echo "Starting application on port ${port}..."
+            nohup java -Dspring.profiles.active=bootstrap,jpa,${environment} -jar ${deployPath}/${env.JAR_NAME} \\
+                --server.port=${port} \\
+                --spring.profiles.active=${environment} \\
+                > ${deployPath}/app.log 2>&1 &
+
+            NEW_PID=\$!
+            echo \$NEW_PID > ${deployPath}/app.pid
+
+            echo "✅ Application started with PID: \$NEW_PID"
+            echo "Log file: ${deployPath}/app.log"
+
+            # Aguarda um pouco para verificar se iniciou
+            sleep 5
+            if ps -p \$NEW_PID > /dev/null; then
+                echo "✅ Application is running!"
+            else
+                echo "❌ Application failed to start!"
+                cat ${deployPath}/app.log
+                exit 1
+            fi
+        """
+	} else {
+		// Windows deployment
+		def deployPath = "C:\\deployments\\${environment}"
+		bat """
+            @echo off
+            if not exist "${deployPath}" mkdir "${deployPath}"
+
+            echo JAR to deploy: ${env.JAR_NAME}
+            echo Checking if JAR exists...
+            if not exist "target\\${env.JAR_NAME}" (
+                echo ERROR: JAR file not found: target\\${env.JAR_NAME}
+                dir target\\*.jar
+                exit /b 1
+            )
+
+            echo Copying JAR to ${deployPath}...
+            copy /Y "target\\${env.JAR_NAME}" "${deployPath}\\${env.JAR_NAME}"
+            if errorlevel 1 (
+                echo ERROR: Failed to copy JAR file!
+                exit /b 1
+            )
+            echo JAR copied successfully!
+
+            echo Stopping existing application on port ${port}...
+            for /f "tokens=5" %%a in ('netstat -aon ^| findstr :${port}') do taskkill /F /PID %%a 2^>NUL
+
+            echo Waiting 2 seconds...
+            ping 127.0.0.1 -n 3 > NUL
+
+            echo Starting application on port ${port}...
+            cd /d "${deployPath}"
+            echo "${deployPath}"
+            start "${env.APP_NAME}-${environment}" /MIN cmd /c "java -jar ${env.JAR_NAME} --server.port=${port} ^> app.log 2^>^&1"
+
+            echo Waiting 10 seconds for application to start...
+            ping 127.0.0.1 -n 16 > NUL
+
+
+
+        """
+
+		//         echo Checking if application is running...
+		//         netstat -ano | findstr :${port}
+		//         if errorlevel 1 (
+		//             echo WARNING: No process listening on port ${port}
+		//         ) else (
+		//             echo Application appears to be running on port ${port}
+		//         )
+	}
+}
+
+def smokeTest(port, environment) {
+	def maxRetries = 30
+	def retryDelay = 2
+
+	echo "Running smoke test for ${environment} on port ${port}..."
+
+	if (isUnix()) {
+		sh """
+            for i in \$(seq 1 ${maxRetries}); do
+                echo "Attempt \$i/${maxRetries}: Testing http://localhost:${port}/swagger-ui/index.html"
+
+
+                if curl -f -s http://localhost:${port}/swagger-ui/index.html > /dev/null 2>&1; then
+                    echo "✅ Smoke test PASSED for ${environment}!"
+                    curl -s http://localhost:${port}/swagger-ui/index.html | head -n 20
+                    exit 0
+                fi
+
+                echo "Service not ready yet, waiting ${retryDelay}s..."
+                sleep ${retryDelay}
+            done
+
+            echo "❌ Smoke test FAILED for ${environment} after ${maxRetries} attempts!"
+            exit 1
+        """
+	} else {
+		bat """
+            @echo off
+            setlocal enabledelayedexpansion
+            set count=0
+
+            :retry
+            set /a count+=1
+            echo Attempt !count!/${maxRetries}: Testing http://localhost:${port}/swagger-ui/index.html
+
+            curl -f -s -o NUL http://localhost:${port}/swagger-ui/index.html
+            if !errorlevel! equ 0 (
+                echo Smoke test PASSED for ${environment}!
+                curl -s http://localhost:${port}/swagger-ui/index.html
+                exit /b 0
+            )
+
+            if !count! lss ${maxRetries} (
+                echo Service not ready yet, waiting ${retryDelay}s...
+                ping 127.0.0.1 -n 3 > NUL
+                goto retry
+            )
+
+            echo Smoke test FAILED for ${environment}!
+            exit /b 1
+        """
 	}
 }
