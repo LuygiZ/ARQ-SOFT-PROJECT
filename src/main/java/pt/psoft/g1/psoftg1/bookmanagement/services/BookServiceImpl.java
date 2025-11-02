@@ -1,6 +1,7 @@
 package pt.psoft.g1.psoftg1.bookmanagement.services;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -158,10 +159,15 @@ public class BookServiceImpl implements BookService {
 		return bookRepository.findByAuthorName(authorName + "%");
 	}
 
-	public Book findByIsbn(String isbn) {
-		return this.bookRepository.findByIsbn(isbn)
-				.orElseThrow(() -> new NotFoundException(Book.class, isbn));
-	}
+    //@Cacheable(value = "books", key = "#isbn")
+    @Override
+    public Book findByIsbn(String isbn) {
+        System.out.println("🔍 BUSCANDO NO BD (não veio do cache): " + isbn);
+        Book book = bookRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new NotFoundException(Book.class, isbn));
+        System.out.println("✅ Book encontrado: " + book.getTitle());
+        return book;
+    }
 
 	public List<Book> getBooksSuggestionsForReader(String readerNumber) {
 		List<Book> books = new ArrayList<>();
