@@ -119,6 +119,11 @@ public class SecurityConfig {
                 // Our public endpoints
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/readers").permitAll() //unregistered should be able to register
+
+                // ✅ ADICIONAR: ISBN lookup endpoints (public for testing)
+                .requestMatchers("/api/isbn/**").permitAll()
+
+                .requestMatchers(HttpMethod.POST, "/api/readers").permitAll()
                 // Our private endpoints
                 //authors
                 .requestMatchers(HttpMethod.POST,"/api/authors").hasRole(Role.LIBRARIAN)

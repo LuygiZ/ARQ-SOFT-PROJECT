@@ -1,6 +1,7 @@
 package pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
@@ -9,11 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import pt.psoft.g1.psoftg1.authormanagement.api.AuthorLendingView;
+import pt.psoft.g1.psoftg1.authormanagement.infrastructure.repositories.impl.sql.sqlmapper.AuthorEntityMapper;
 import pt.psoft.g1.psoftg1.authormanagement.model.Author;
 import pt.psoft.g1.psoftg1.authormanagement.repositories.AuthorRepository;
+import pt.psoft.g1.psoftg1.authormanagement.services.AuthorMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Cache-Aside Pattern Implementation for Author Repository
@@ -43,6 +47,10 @@ public class AuthorCacheRepository implements AuthorRepository {
 
     private final AuthorRepository redisRepository;
     private final AuthorRepository sqlRepository;
+    @Autowired
+    private AuthorEntityMapper authorEntityMapper;
+
+
 
     public AuthorCacheRepository(
             @Qualifier("redisAuthorRepository") AuthorRepository redisRepository,
@@ -74,13 +82,19 @@ public class AuthorCacheRepository implements AuthorRepository {
         if (cached != null) {
             if (!cached.isEmpty()) {
                 log.info("🎯 CACHE HIT - Exact name: '{}' - {} authors", name, cached.size());
-                return cached;
+
+                // ✅ Forçar reconstrução coerente dos objetos (Redis -> SQL -> Domínio)
+                List<Author> normalizedAuthors = cached.stream()
+                        .map(authorEntityMapper::toEntity)   // Author -> AuthorSqlEntity
+                        .map(authorEntityMapper::toModel)    // AuthorSqlEntity -> Author (re-hidratado)
+                        .collect(Collectors.toList());
+
+                return normalizedAuthors;
             } else {
                 log.debug("📭 Cache returned empty list for: '{}' - trying SQL", name);
             }
-        } else {
-            log.debug("❌ Cache error/miss for: '{}' - trying SQL", name);
         }
+
 
         // ✅ Ir buscar ao SQL (source of truth)
         log.info("📊 CACHE MISS - Fetching from SQL: '{}'", name);
