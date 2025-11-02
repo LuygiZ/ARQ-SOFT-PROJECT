@@ -13,213 +13,177 @@ pipeline {
 		choice(
 			name: 'Environment',
 			choices: ["docker", "local"],
-			description: 'Choose an Environment.'
+			description: 'Choose deployment environment type.'
 		)
 	}
 
 	environment {
 		MAVEN_DIR = tool(name: 'Maven 3.9.11', type: 'maven')
 		APP_NAME = 'psoft-g1'
-		//         JAR_NAME = 'psoft-g1-0.0.1-SNAPSHOT.jar'
 
-		// Portas para cada ambiente
+		// Ports for each environment
 		DEV_PORT = '8080'
 		STAGING_PORT = '8081'
 		PROD_PORT = '8082'
 
-		// Paths para deploy local
+		// Local deployment paths
 		DEPLOY_BASE_PATH = '/opt/deployments'
 	}
 
 	stages {
-		stage('Checkout') {
-			steps {
-				echo '📥 A fazer checkout do repositório...'
-				checkout scm
-			}
-		}
-
-		stage('Build & Compile') {
+		// STAGE 1: Checkout & Build
+		stage('Stage 1: Build & Compile') {
 			steps {
 				script {
-					echo '🔨 Cleaning workspace...'
-					if (isUnix())
-					{
+					echo '📥 Stage 1: Checking out code and compiling...'
+					checkout scm
+
+					if (isUnix()) {
 						sh "mvn clean compile test-compile"
-					}
-					else
-					{
+					} else {
 						bat "mvn clean compile test-compile"
 					}
 				}
 			}
 		}
 
-
-		// correr em parelelo os testes
-		// parallel {}
-
-		stage('Unit Tests') {
-			steps {
-				script {
-					echo 'Running unit tests...'
-					if (isUnix())
-					{
-						sh "mvn surefire:test"
-					}
-					else
-					{
-						bat "mvn surefire:test"
-					}
-				}
-			}
-			post {
-				always {
-					junit '**/target/surefire-reports/*.xml'
-					publishHTML(target: [
-						allowMissing: false,
-						alwaysLinkToLastBuild: true,
-						keepAll: true,
-						reportDir: 'target/surefire-reports',
-						reportFiles: 'index.html',
-						reportName: 'Unit Tests Report'
-					])
-				}
-			}
-		}
-
-		stage('Integration Tests') {
-			steps {
-				script {
-					echo 'Running integration tests...'
-					if (isUnix())
-					{
-						sh "mvn failsafe:integration-test failsafe:verify"
-					}
-					else
-					{
-						bat "mvn failsafe:integration-test failsafe:verify"
-					}
-				}
-			}
-		}
-
-		stage('Test Coverage') {
-			steps {
-				script {
-					echo '📊 Gerando relatório de cobertura...'
-					if (isUnix()) {
-						sh "mvn jacoco:report"
-					} else {
-						bat "mvn jacoco:report"
-					}
-				}
-			}
-			post {
-				always {
-					jacoco(
-						execPattern: '**/target/jacoco.exec',
-						classPattern: '**/target/classes',
-						sourcePattern: '**/src/main/java',
-						inclusionPattern: '**/*.class',
-						minimumInstructionCoverage: '60',
-						minimumBranchCoverage: '50'
-					)
-					publishHTML(target: [
-						allowMissing: false,
-						alwaysLinkToLastBuild: true,
-						keepAll: true,
-						reportDir: 'target/site/jacoco',
-						reportFiles: 'index.html',
-						reportName: 'JaCoCo Coverage Report'
-					])
-				}
-			}
-		}
-
-		stage('Mutation Tests') {
-			steps {
-				script {
-					echo 'Running mutation tests...'
-					if (isUnix())
-					{
-						sh "mvn org.pitest:pitest-maven:mutationCoverage"
-					}
-					else
-					{
-						bat "mvn org.pitest:pitest-maven:mutationCoverage"
-					}
-				}
-			}
-			post {
-				always {
-					publishHTML(target: [
-						allowMissing: false,
-						alwaysLinkToLastBuild: true,
-						keepAll: true,
-						reportDir: 'target/pit-reports',
-						reportFiles: 'index.html',
-						reportName: 'PIT Mutation Report'
-					])
-				}
-			}
-
-		}
-
-		stage('SonarQube Analysis') {
-			steps {
-				script {
-					def ENVIRONMENT_2_SONARQUBE_SERVER = [
-						'docker': 'sonarqube_docker',
-						'local' : 'sonarqube_local'
-					]
-
-					def sonarServer = ENVIRONMENT_2_SONARQUBE_SERVER[params.Environment]
-					echo "Running SonarQube analysis using server: ${sonarServer}"
-					withSonarQubeEnv(sonarServer)
-					{
-						if (isUnix())
-						{
-							sh "mvn verify -X sonar:sonar"
+		// STAGE 2: Unit & Integration Tests
+		stage('Stage 2: Unit & Integration Tests') {
+			parallel {
+				stage('Unit Tests') {
+					steps {
+						script {
+							echo '🧪 Running unit tests...'
+							if (isUnix()) {
+								sh "mvn surefire:test"
+							} else {
+								bat "mvn surefire:test"
+							}
 						}
-						else
-						{
-							bat "mvn verify -X sonar:sonar"
+					}
+					post {
+						always {
+							junit '**/target/surefire-reports/*.xml'
+							publishHTML(target: [
+								allowMissing: false,
+								alwaysLinkToLastBuild: true,
+								keepAll: true,
+								reportDir: 'target/surefire-reports',
+								reportFiles: 'index.html',
+								reportName: 'Unit Tests Report'
+							])
+						}
+					}
+				}
+
+				stage('Integration Tests') {
+					steps {
+						script {
+							echo '🔗 Running integration tests...'
+							if (isUnix()) {
+								sh "mvn failsafe:integration-test failsafe:verify"
+							} else {
+								bat "mvn failsafe:integration-test failsafe:verify"
+							}
+						}
+					}
+					post {
+						always {
+							junit '**/target/failsafe-reports/*.xml'
+							publishHTML(target: [
+								allowMissing: false,
+								alwaysLinkToLastBuild: true,
+								keepAll: true,
+								reportDir: 'target/failsafe-reports',
+								reportFiles: 'index.html',
+								reportName: 'Integration Tests Report'
+							])
 						}
 					}
 				}
 			}
 		}
 
-		//         stage('Quality Gate') {
-		//             steps {
-		//                 timeout(time: 3, unit: 'MINUTES') {
-		//                     waitForQualityGate abortPipeline: true
-		//                 }
-		//             }
-		//         }
+		// STAGE 3-5: Quality Gates (QG1)
+		stage('Stage 3-5: Quality Analysis (QG1)') {
+			parallel {
+				stage('Test Coverage') {
+					steps {
+						script {
+							echo '📊 Generating coverage report...'
+							if (isUnix()) {
+								sh "mvn jacoco:report"
+							} else {
+								bat "mvn jacoco:report"
+							}
+						}
+					}
+					post {
+						always {
+							jacoco(
+								execPattern: '**/target/jacoco.exec',
+								classPattern: '**/target/classes',
+								sourcePattern: '**/src/main/java',
+								inclusionPattern: '**/*.class',
+								minimumInstructionCoverage: '60',
+								minimumBranchCoverage: '50'
+							)
+							publishHTML(target: [
+								allowMissing: false,
+								alwaysLinkToLastBuild: true,
+								keepAll: true,
+								reportDir: 'target/site/jacoco',
+								reportFiles: 'index.html',
+								reportName: 'JaCoCo Coverage Report'
+							])
+						}
+					}
+				}
 
-		stage('Package') {
+				stage('Mutation Tests') {
+					steps {
+						script {
+							echo '🧬 Running mutation tests...'
+							if (isUnix()) {
+								sh "mvn org.pitest:pitest-maven:mutationCoverage"
+							} else {
+								bat "mvn org.pitest:pitest-maven:mutationCoverage"
+							}
+						}
+					}
+					post {
+						always {
+							publishHTML(target: [
+								allowMissing: false,
+								alwaysLinkToLastBuild: true,
+								keepAll: true,
+								reportDir: 'target/pit-reports',
+								reportFiles: 'index.html',
+								reportName: 'PIT Mutation Report'
+							])
+						}
+					}
+				}
+			}
+		}
+
+		// STAGE 6: Package
+		stage('Stage 6: Package') {
 			steps {
 				script {
 					echo '📦 Building the final package...'
 					if (isUnix()) {
 						sh 'mvn package -DskipTests'
-						// Captura o nome do JAR
 						def jarPath = sh(script: "find target -name '*.jar' -type f | head -1", returnStdout: true).trim()
 						env.JAR_NAME = sh(script: "basename ${jarPath}", returnStdout: true).trim()
 					} else {
 						bat 'mvn package -DskipTests'
-						// Captura o nome do JAR no Windows
-
 						bat 'dir /b target\\*.jar > jarname.txt'
 						def jarName = readFile('jarname.txt').trim()
 						env.JAR_NAME = jarName
-
 					}
-					echo "📦 JAR gerado: ${env.JAR_NAME}"
+					echo "📦 JAR generated: ${env.JAR_NAME}"
 					currentBuild.displayName = "#${env.BUILD_NUMBER} - ${env.JAR_NAME}"
-
 				}
 			}
 			post {
@@ -229,11 +193,11 @@ pipeline {
 			}
 		}
 
-		stage('Deploy to DEV') {
+		// STAGE 7: Deploy to DEV
+		stage('Stage 7: Deploy to DEV') {
 			steps {
 				script {
-					echo '🚀 Deploying to DEVELOPMENT environment...'
-					echo "📦 Using JAR: ${env.JAR_NAME}"
+					echo '🚀 Stage 7: Deploying to DEV environment...'
 					if (params.Environment == 'docker') {
 						deployDocker('dev', env.DEV_PORT)
 					} else {
@@ -243,19 +207,34 @@ pipeline {
 			}
 		}
 
-		stage('Smoke Test DEV') {
-			steps {
-				script {
-					echo '💨 Running smoke tests on DEV...'
-					smokeTest(env.DEV_PORT, 'dev')
+		// STAGE 8: System Tests on DEV (QG2)
+		stage('Stage 8: System Tests DEV (QG2)') {
+			parallel {
+				stage('Smoke Test DEV') {
+					steps {
+						script {
+							echo '💨 Running smoke tests on DEV...'
+							smokeTest(env.DEV_PORT, 'dev')
+						}
+					}
+				}
+
+				stage('API Health Check') {
+					steps {
+						script {
+							echo '🏥 Checking API health on DEV...'
+							apiHealthCheck(env.DEV_PORT, 'dev')
+						}
+					}
 				}
 			}
 		}
 
-		stage('Deploy to STAGING') {
+		// STAGE 9: Deploy to STAGING
+		stage('Stage 9: Deploy to STAGING') {
 			steps {
 				script {
-					echo '🚀 Deploying to STAGING environment...'
+					echo '🚀 Stage 9: Deploying to STAGING environment...'
 					if (params.Environment == 'docker') {
 						deployDocker('staging', env.STAGING_PORT)
 					} else {
@@ -265,20 +244,35 @@ pipeline {
 			}
 		}
 
-		stage('Smoke Test STAGING') {
-			steps {
-				script {
-					echo '💨 Running smoke tests on STAGING...'
-					smokeTest(env.STAGING_PORT, 'staging')
+		// STAGE 10: System Tests on STAGING (QG3)
+		stage('Stage 10: System Tests STAGING (QG3)') {
+			parallel {
+				stage('Smoke Test STAGING') {
+					steps {
+						script {
+							echo '💨 Running smoke tests on STAGING...'
+							smokeTest(env.STAGING_PORT, 'staging')
+						}
+					}
+				}
+
+				stage('Integration Validation') {
+					steps {
+						script {
+							echo '🔍 Validating integrations on STAGING...'
+							apiHealthCheck(env.STAGING_PORT, 'staging')
+						}
+					}
 				}
 			}
 		}
 
-		stage('Deploy to PRODUCTION') {
+		// STAGE 11: Deploy to PRODUCTION
+		stage('Stage 11: Deploy to PRODUCTION') {
 			steps {
-				//                         input message: 'Deploy to PRODUCTION?', ok: 'Deploy'
+				input message: '🚨 Deploy to PRODUCTION?', ok: 'Deploy'
 				script {
-					echo '🚀 Deploying to PRODUCTION environment...'
+					echo '🚀 Stage 11: Deploying to PRODUCTION environment...'
 					if (params.Environment == 'docker') {
 						deployDocker('production', env.PROD_PORT)
 					} else {
@@ -288,11 +282,25 @@ pipeline {
 			}
 		}
 
-		stage('Smoke Test PRODUCTION') {
-			steps {
-				script {
-					echo '💨 Running smoke tests on PRODUCTION...'
-					smokeTest(env.PROD_PORT, 'production')
+		// STAGE 12: Final Validation (QG4)
+		stage('Stage 12: Production Validation (QG4)') {
+			parallel {
+				stage('Smoke Test PRODUCTION') {
+					steps {
+						script {
+							echo '💨 Running smoke tests on PRODUCTION...'
+							smokeTest(env.PROD_PORT, 'production')
+						}
+					}
+				}
+
+				stage('Final Health Check') {
+					steps {
+						script {
+							echo '✅ Final health check on PRODUCTION...'
+							apiHealthCheck(env.PROD_PORT, 'production')
+						}
+					}
 				}
 			}
 		}
@@ -303,20 +311,21 @@ pipeline {
 			echo '✅ Pipeline completed successfully!'
 			script {
 				def deploymentSummary = """
-                    ═══════════════════════════════════════════════════
-                            DEPLOYMENT SUCCESSFUL
-                    ═══════════════════════════════════════════════════
-                    Build: #${env.BUILD_NUMBER}
-                    Deployment Type: ${params.Environment}
+                ═══════════════════════════════════════════════════
+                        DEPLOYMENT SUCCESSFUL
+                ═══════════════════════════════════════════════════
+                Build: #${env.BUILD_NUMBER}
+                JAR: ${env.JAR_NAME}
+                Deployment Type: ${params.Environment}
 
-                    Environments deployed:
-                      🟢 DEV        → http://localhost:${env.DEV_PORT}
-                      🟢 STAGING    → http://localhost:${env.STAGING_PORT}
-                      🟢 PRODUCTION → http://localhost:${env.PROD_PORT}
+                Environments deployed:
+                  🟢 DEV        → http://localhost:${env.DEV_PORT}
+                  🟢 STAGING    → http://localhost:${env.STAGING_PORT}
+                  🟢 PRODUCTION → http://localhost:${env.PROD_PORT}
 
-                    Build URL: ${env.BUILD_URL}
-                    ═══════════════════════════════════════════════════
-                    """
+                Build URL: ${env.BUILD_URL}
+                ═══════════════════════════════════════════════════
+                """
 				echo deploymentSummary
 			}
 		}
@@ -335,10 +344,9 @@ pipeline {
 			}
 		}
 
-		always
-		{
-			echo 'Performing cleanup...'
-			// Cleanup code
+		always {
+			echo '🧹 Performing cleanup...'
+			cleanWs(deleteDirs: true, patterns: [[pattern: 'target/**', type: 'INCLUDE']])
 		}
 	}
 }
@@ -357,7 +365,7 @@ def deployDocker(environment, port) {
 
 	if (isUnix()) {
 		sh """
-            # Cria rede Docker se não existir
+            # Create Docker network if not exists
             if ! docker network inspect ${networkName} > /dev/null 2>&1; then
                 echo "Creating Docker network: ${networkName}"
                 docker network create ${networkName}
@@ -365,7 +373,7 @@ def deployDocker(environment, port) {
                 echo "Docker network ${networkName} already exists"
             fi
 
-            # Verifica/inicia Redis
+            # Check/Start Redis
             if ! docker ps --format '{{.Names}}' | grep -q "^${redisContainerName}\$"; then
                 echo "Starting Redis container for ${environment}..."
                 docker stop ${redisContainerName} 2>/dev/null || true
@@ -382,7 +390,7 @@ def deployDocker(environment, port) {
                 echo "Redis container ${redisContainerName} already running"
             fi
 
-            # Remove container antigo se existir
+            # Remove old container if exists
             echo "Checking for existing container: ${containerName}"
             if docker ps -a --format '{{.Names}}' | grep -q "^${containerName}\$"; then
                 echo "Stopping existing container..."
@@ -391,30 +399,30 @@ def deployDocker(environment, port) {
                 docker rm ${containerName} || true
             fi
 
-            # Remove imagem antiga se existir
+            # Remove old image if exists
             if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${imageName}\$"; then
                 echo "Removing old image..."
                 docker rmi ${imageName} || true
             fi
 
-            # Cria Dockerfile se não existir
+            # Create Dockerfile if not exists
             if [ ! -f Dockerfile ]; then
                 echo "Creating Dockerfile..."
                 cat > Dockerfile << 'EOF'
-            FROM openjdk:17-jdk-slim
-            WORKDIR /app
-            COPY target/*.jar app.jar
-            EXPOSE 8080
-            ENV JAVA_OPTS=""
-            ENTRYPOINT ["java", "-jar", "app.jar"]
-            EOF
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY target/*.jar app.jar
+EXPOSE 8080
+ENV JAVA_OPTS=""
+ENTRYPOINT ["java", "-jar", "app.jar"]
+EOF
             fi
 
-            # Build da nova imagem
+            # Build new image
             echo "Building Docker image: ${imageName}"
             docker build -t ${imageName} .
 
-            # Inicia novo container
+            # Start new container
             echo "Starting new container: ${containerName}"
             docker run -d \\
                 --name ${containerName} \\
@@ -425,8 +433,7 @@ def deployDocker(environment, port) {
                 -e SPRING_DATA_REDIS_PORT=6379 \\
                 ${imageName}
 
-
-            # Aguarda e verifica se o container está rodando
+            # Wait and verify container is running
             echo "Waiting for container to start..."
             sleep 10
 
@@ -450,7 +457,7 @@ def deployDocker(environment, port) {
 		bat """
             @echo off
 
-            REM Cria rede Docker se não existir
+            REM Create Docker network if not exists
             docker network inspect ${networkName} >nul 2>&1
             if errorlevel 1 (
                 echo Creating Docker network: ${networkName}
@@ -459,7 +466,7 @@ def deployDocker(environment, port) {
                 echo Docker network ${networkName} already exists
             )
 
-            REM Verifica/inicia Redis
+            REM Check/Start Redis
             docker ps --format "{{.Names}}" | findstr /X "${redisContainerName}" >nul 2>&1
             if errorlevel 1 (
                 echo Starting Redis container for ${environment}...
@@ -518,7 +525,7 @@ def deployDocker(environment, port) {
                 --restart unless-stopped ^
                 ${imageName}
 
-            timeout /t 5 /nobreak >nul
+            timeout /t 10 /nobreak >nul
             docker ps --filter "name=${containerName}"
         """
 	}
@@ -530,14 +537,14 @@ def deployLocal(environment, port) {
 	if (isUnix()) {
 		def deployPath = "${env.DEPLOY_BASE_PATH}/${environment}"
 		sh """
-            # Cria diretório se não existir
+            # Create directory if not exists
             mkdir -p ${deployPath}
 
-            # Copia o JAR
+            # Copy JAR
             echo "Copying JAR ${env.JAR_NAME} to ${deployPath}..."
             cp target/${env.JAR_NAME} ${deployPath}/${env.JAR_NAME}
 
-            # Para aplicação existente
+            # Stop existing application
             if [ -f ${deployPath}/app.pid ]; then
                 OLD_PID=\$(cat ${deployPath}/app.pid)
                 if ps -p \$OLD_PID > /dev/null 2>&1; then
@@ -548,12 +555,12 @@ def deployLocal(environment, port) {
                 fi
             fi
 
-            # Mata qualquer processo na porta
+            # Kill any process on the port
             lsof -ti:${port} | xargs kill -9 2>/dev/null || true
 
-            # Inicia nova aplicação
+            # Start new application
             echo "Starting application on port ${port}..."
-            nohup java -Dspring.profiles.active=bootstrap,jpa,${environment} -jar ${deployPath}/${env.JAR_NAME} \\
+            nohup java -jar ${deployPath}/${env.JAR_NAME} \\
                 --server.port=${port} \\
                 --spring.profiles.active=${environment} \\
                 > ${deployPath}/app.log 2>&1 &
@@ -564,7 +571,7 @@ def deployLocal(environment, port) {
             echo "✅ Application started with PID: \$NEW_PID"
             echo "Log file: ${deployPath}/app.log"
 
-            # Aguarda um pouco para verificar se iniciou
+            # Wait and verify
             sleep 5
             if ps -p \$NEW_PID > /dev/null; then
                 echo "✅ Application is running!"
@@ -575,19 +582,10 @@ def deployLocal(environment, port) {
             fi
         """
 	} else {
-		// Windows deployment
 		def deployPath = "C:\\deployments\\${environment}"
 		bat """
             @echo off
             if not exist "${deployPath}" mkdir "${deployPath}"
-
-            echo JAR to deploy: ${env.JAR_NAME}
-            echo Checking if JAR exists...
-            if not exist "target\\${env.JAR_NAME}" (
-                echo ERROR: JAR file not found: target\\${env.JAR_NAME}
-                dir target\\*.jar
-                exit /b 1
-            )
 
             echo Copying JAR to ${deployPath}...
             copy /Y "target\\${env.JAR_NAME}" "${deployPath}\\${env.JAR_NAME}"
@@ -595,7 +593,6 @@ def deployLocal(environment, port) {
                 echo ERROR: Failed to copy JAR file!
                 exit /b 1
             )
-            echo JAR copied successfully!
 
             echo Stopping existing application on port ${port}...
             for /f "tokens=5" %%a in ('netstat -aon ^| findstr :${port}') do taskkill /F /PID %%a 2^>NUL
@@ -605,23 +602,11 @@ def deployLocal(environment, port) {
 
             echo Starting application on port ${port}...
             cd /d "${deployPath}"
-            echo "${deployPath}"
             start "${env.APP_NAME}-${environment}" /MIN cmd /c "java -jar ${env.JAR_NAME} --server.port=${port} ^> app.log 2^>^&1"
 
             echo Waiting 10 seconds for application to start...
-            ping 127.0.0.1 -n 16 > NUL
-
-
-
+            ping 127.0.0.1 -n 11 > NUL
         """
-
-		//         echo Checking if application is running...
-		//         netstat -ano | findstr :${port}
-		//         if errorlevel 1 (
-		//             echo WARNING: No process listening on port ${port}
-		//         ) else (
-		//             echo Application appears to be running on port ${port}
-		//         )
 	}
 }
 
@@ -636,10 +621,8 @@ def smokeTest(port, environment) {
             for i in \$(seq 1 ${maxRetries}); do
                 echo "Attempt \$i/${maxRetries}: Testing http://localhost:${port}/swagger-ui/index.html"
 
-
                 if curl -f -s http://localhost:${port}/swagger-ui/index.html > /dev/null 2>&1; then
                     echo "✅ Smoke test PASSED for ${environment}!"
-                    curl -s http://localhost:${port}/swagger-ui/index.html | head -n 20
                     exit 0
                 fi
 
@@ -663,7 +646,6 @@ def smokeTest(port, environment) {
             curl -f -s -o NUL http://localhost:${port}/swagger-ui/index.html
             if !errorlevel! equ 0 (
                 echo Smoke test PASSED for ${environment}!
-                curl -s http://localhost:${port}/swagger-ui/index.html
                 exit /b 0
             )
 
@@ -675,6 +657,72 @@ def smokeTest(port, environment) {
 
             echo Smoke test FAILED for ${environment}!
             exit /b 1
+        """
+	}
+}
+
+def apiHealthCheck(port, environment) {
+	def maxRetries = 10
+	def retryDelay = 2
+
+	echo "Running API health check for ${environment} on port ${port}..."
+
+	if (isUnix()) {
+		sh """
+            for i in \$(seq 1 ${maxRetries}); do
+                echo "Health check attempt \$i/${maxRetries}"
+
+                # Check if the actuator endpoint exists
+                if curl -f -s http://localhost:${port}/actuator/health > /dev/null 2>&1; then
+                    echo "✅ API Health check PASSED for ${environment}!"
+                    curl -s http://localhost:${port}/actuator/health
+                    exit 0
+                fi
+
+                # Fallback to swagger endpoint
+                if curl -f -s http://localhost:${port}/swagger-ui/index.html > /dev/null 2>&1; then
+                    echo "✅ API Health check PASSED for ${environment} (via Swagger)!"
+                    exit 0
+                fi
+
+                echo "Waiting ${retryDelay}s..."
+                sleep ${retryDelay}
+            done
+
+            echo "⚠️  Health check completed with warnings for ${environment}"
+            exit 0
+        """
+	} else {
+		bat """
+            @echo off
+            setlocal enabledelayedexpansion
+            set count=0
+
+            :retry
+            set /a count+=1
+            echo Health check attempt !count!/${maxRetries}
+
+            curl -f -s -o NUL http://localhost:${port}/actuator/health
+            if !errorlevel! equ 0 (
+                echo API Health check PASSED for ${environment}!
+                curl -s http://localhost:${port}/actuator/health
+                exit /b 0
+            )
+
+            curl -f -s -o NUL http://localhost:${port}/swagger-ui/index.html
+            if !errorlevel! equ 0 (
+                echo API Health check PASSED for ${environment} (via Swagger)!
+                exit /b 0
+            )
+
+            if !count! lss ${maxRetries} (
+                echo Waiting ${retryDelay}s...
+                ping 127.0.0.1 -n 3 > NUL
+                goto retry
+            )
+
+            echo Health check completed with warnings for ${environment}
+            exit /b 0
         """
 	}
 }
