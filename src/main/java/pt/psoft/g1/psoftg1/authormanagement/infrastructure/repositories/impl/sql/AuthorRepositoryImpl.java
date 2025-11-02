@@ -16,8 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Profile("sql-redis")
-@Primary
+
 @Repository
 @RequiredArgsConstructor
 public class AuthorRepositoryImpl implements AuthorRepository

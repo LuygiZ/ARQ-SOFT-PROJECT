@@ -154,51 +154,56 @@ public class BookRepositoryImpl implements BookRepository
 
     @Override
     @Transactional
-    public Book save(Book book)
-    {
-        // Convert the domain model (Book) to a JPA entity (BookEntity)
-        BookSqlEntity entity = bookEntityMapper.toEntity(book);
-
-        // Retrieve the existing Genre model from the repository
-        // Throws an exception if the genre is not found
-        Genre genreModel = genreRepo.findByString(book.getGenre().getGenre())
-                .orElseThrow(() -> new RuntimeException("Genre not found"));
-
-        // Get the managed JPA reference for the GenreEntity using its database ID (pk)
-        // This ensures we use the existing GenreEntity instead of creating a new one
-        GenreSqlEntity genreEntity = em.getReference(GenreSqlEntity.class, genreModel.getPk());
-
-        // Set the managed GenreEntity on the BookEntity
-        entity.setGenre(genreEntity);
-
-        // Prepare a list to hold managed AuthorEntity instances
-        List<AuthorSqlEntity> authors = new ArrayList<>();
-
-        // For each author in the Book model
-        for (var author : book.getAuthors())
-        {
-            // Retrieve the corresponding Author model from the repository by author number
-            //TODO: temos aqui uma questao, o searchByNameName retorna uma lista de nomes, entao pode nao ser o autor correto (no caso de haver varios autores com o mesmo nome)
-            Author auth  = authorRepo.searchByNameName(author.getName().getName()).get(0);
-            if (auth == null)
-            {
-                throw new RuntimeException("Author not found");
-            }
-
-            // Get a managed reference to the existing AuthorEntity by its author number
-            AuthorSqlEntity authorEntity = em.getReference(AuthorSqlEntity.class, auth.getAuthorNumber());
-
-            // Add the managed AuthorEntity to the list
-            authors.add(authorEntity);
+    public Book save(Book book) {
+        if (book == null) {
+            throw new IllegalArgumentException("Book cannot be null");
         }
 
-        // Associate all managed AuthorEntity objects with the BookEntity
-        entity.setAuthors(authors);
+        BookSqlEntity entity = bookEntityMapper.toEntity(book);
 
-        // Persist the BookEntity and return the saved Book as a domain model
+        // === Handle Genre ===
+        Genre genreModel = genreRepo.findByString(book.getGenre().getGenre())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Genre not found: " + book.getGenre().getGenre()));
+
+        GenreSqlEntity genreEntity = em.getReference(GenreSqlEntity.class, genreModel.getPk());
+        entity.setGenre(genreEntity);
+
+        // === Handle Authors ===
+        // ✅ CORREÇÃO: Buscar authors POR NOME (já que authorNumber pode não estar setado no Book)
+        List<AuthorSqlEntity> authorEntities = book.getAuthors().stream()
+                .map(author -> {
+                    String authorName = author.getName().getName();
+
+                    // Buscar author pelo nome no repositório
+                    List<Author> foundAuthors = authorRepo.searchByNameName(authorName);
+
+                    if (foundAuthors.isEmpty()) {
+                        throw new IllegalStateException(
+                                "Author not found: " + authorName +
+                                        ". Make sure authors are created before books.");
+                    }
+
+                    // Pegar o primeiro (assumindo que nome é único ou próximo disso)
+                    Author matchedAuthor = foundAuthors.get(0);
+
+                    // ✅ CRÍTICO: Verificar se authorNumber foi gerado
+                    if (matchedAuthor.getAuthorNumber() == null) {
+                        throw new IllegalStateException(
+                                "Author '" + authorName + "' exists but has no authorNumber. " +
+                                        "Database may not have committed yet.");
+                    }
+
+                    return em.getReference(AuthorSqlEntity.class, matchedAuthor.getAuthorNumber());
+                })
+                .toList();
+
+        entity.setAuthors(authorEntities);
+
+        // === Save ===
         BookSqlEntity saved = bookRepo.save(entity);
-        System.out.println("Saved entity ISBN: " +
-                (saved.getIsbn() != null ? saved.getIsbn() : "null"));
+        System.out.println("Saved entity ISBN: " + saved.getIsbn());
+
         return bookEntityMapper.toModel(saved);
     }
 

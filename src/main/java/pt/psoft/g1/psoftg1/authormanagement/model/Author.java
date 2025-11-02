@@ -96,5 +96,13 @@ public class Author extends EntityWithPhoto
 
         setPhotoInternal((String) null);
     }
+
+    public void setVersion(long version) {  // ← ADICIONA ESTE
+        this.version = version;
+    }
+
+    public void setAuthorNumber(Long authorNumber) {
+        this.authorNumber = authorNumber;
+    }
 }
 
