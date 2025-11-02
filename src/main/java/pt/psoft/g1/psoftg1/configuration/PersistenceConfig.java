@@ -11,7 +11,7 @@ public class PersistenceConfig {
 
     /**
      * The persistence strategy to use.
-     * Valid values: sql-redis, mongodb-redis, elasticsearch
+     * Valid values: sql-redis, mongodb-redis
      */
     private String strategy = "sql-redis";
 
