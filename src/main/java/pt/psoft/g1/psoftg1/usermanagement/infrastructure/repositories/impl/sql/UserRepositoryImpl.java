@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -30,11 +31,10 @@ import java.util.Optional;
 /**
  * SQL implementation of UserRepository using UserSqlEntity.
  */
-@Profile("sql")
+@Profile("sql-redis")
 @Primary
 @Repository
 @RequiredArgsConstructor
-@Component
 public class UserRepositoryImpl implements UserRepository
 {
     private final SpringDataUserRepository userRepo;
@@ -97,6 +97,7 @@ public class UserRepositoryImpl implements UserRepository
     }
 
     @Override
+    //@Cacheable(value = "users", key = "#username", unless = "#result == null || !#result.isPresent()")
     public Optional<User> findByUsername(String username)
     {
         Optional<UserSqlEntity> entityOpt = userRepo.findByUsername(username);

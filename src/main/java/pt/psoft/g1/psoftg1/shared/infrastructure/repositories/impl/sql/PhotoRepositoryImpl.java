@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import pt.psoft.g1.psoftg1.shared.infrastructure.repositories.impl.sql.sqlmapper.PhotoEntityMapper;
 import pt.psoft.g1.psoftg1.shared.repositories.PhotoRepository;
 
-@Profile("sql")
+@Profile("sql-redis")
 @Primary
 @Repository
 @RequiredArgsConstructor

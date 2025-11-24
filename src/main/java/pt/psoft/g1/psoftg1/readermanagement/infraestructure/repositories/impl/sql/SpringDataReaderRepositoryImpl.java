@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-@Profile("sql")
+@Profile("sql-redis")
 public interface SpringDataReaderRepositoryImpl extends CrudRepository<ReaderDetailsSqlEntity, Long>
 {
     @Query("SELECT r " +

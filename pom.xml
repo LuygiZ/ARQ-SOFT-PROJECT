@@ -115,11 +115,34 @@
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 
-		<!-- Redis -->
+        <!-- Redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>5.1.2</version>
+        </dependency>
+
+        <!-- Embedded Redis for development/testing -->
+        <dependency>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <version>0.7.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Para serialização -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 	</dependencies>
 		
